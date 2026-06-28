@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나의 뇌</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F7F6F3;
+  --surface:#FFFFFF;
+  --surface2:#F0EEE9;
+  --border:#E0DDD6;
+  --text:#1A1917;
+  --text2:#6B6860;
+  --text3:#A8A59E;
+  --tag-purple-bg:#EEEDFE;--tag-purple-fg:#3C3489;
+  --tag-teal-bg:#E1F5EE;--tag-teal-fg:#085041;
+  --tag-coral-bg:#FAECE7;--tag-coral-fg:#712B13;
+  --tag-amber-bg:#FAEEDA;--tag-amber-fg:#633806;
+  --tag-blue-bg:#E6F1FB;--tag-blue-fg:#0C447C;
+  --tag-gray-bg:#F1EFE8;--tag-gray-fg:#444441;
+}
+body{
+  font-family:'IBM Plex Sans KR',sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;font-size:15px;line-height:1.6;
+}
+header{padding:2rem 2rem 0;max-width:720px;margin:0 auto}
+.header-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
+header h1{font-size:22px;font-weight:500;letter-spacing:-0.3px}
+header p{font-size:13px;color:var(--text3);margin-top:4px}
+.header-actions{display:flex;gap:8px;align-items:center;padding-top:4px}
+
+/* sync badge */
+.sync-badge{
+  font-size:11px;padding:3px 10px;border-radius:20px;
+  background:var(--surface2);color:var(--text3);white-space:nowrap;
+  transition:all 0.2s;
+}
+.sync-ok{background:#E1F5EE;color:#085041}
+.sync-saving{background:#FAEEDA;color:#633806}
+.sync-local{background:#F1EFE8;color:#444441}
+.sync-error{background:#FAECE7;color:#712B13}
+
+/* tabs */
+.tabs{display:flex;margin-top:1.5rem;border-bottom:1px solid var(--border)}
+.tab{
+  padding:10px 20px;font-size:14px;
+  font-family:'IBM Plex Sans KR',sans-serif;
+  cursor:pointer;border:none;background:none;color:var(--text2);
+  border-bottom:2px solid transparent;margin-bottom:-1px;transition:color 0.15s;
+}
+.tab.active{color:var(--text);border-bottom-color:var(--text);font-weight:500}
+.tab:hover{color:var(--text)}
+
+main{max-width:720px;margin:0 auto;padding:1.5rem 2rem 4rem}
+.section{display:none}.section.active{display:block}
+
+/* search */
+.search-input{
+  width:100%;padding:9px 14px;
+  border:1px solid var(--border);border-radius:10px;
+  font-size:14px;font-family:'IBM Plex Sans KR',sans-serif;
+  background:var(--surface);color:var(--text);outline:none;
+  margin-bottom:12px;
+}
+.search-input:focus{border-color:#A8A59E}
+
+/* buttons */
+.btn{
+  padding:7px 16px;border:1px solid var(--border);border-radius:8px;
+  background:none;font-size:13px;font-family:'IBM Plex Sans KR',sans-serif;
+  cursor:pointer;color:var(--text);transition:background 0.1s;
+}
+.btn:hover{background:var(--surface2)}
+.btn-dark{background:var(--text);color:#fff;border-color:var(--text)}
+.btn-dark:hover{background:#333}
+.btn-sm{padding:4px 10px;font-size:12px}
+.btn-ghost{
+  background:none;border:none;cursor:pointer;
+  color:var(--text3);font-size:13px;padding:0 3px;transition:color 0.1s;
+  font-family:'IBM Plex Sans KR',sans-serif;
+}
+.btn-ghost:hover{color:var(--text)}
+
+/* dump input */
+.dump-input-area{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.5rem;
+}
+.dump-label{font-size:12px;color:var(--text3);margin-bottom:8px;display:block}
+textarea{
+  width:100%;min-height:72px;border:none;outline:none;
+  font-size:15px;font-family:'IBM Plex Sans KR',sans-serif;
+  color:var(--text);background:transparent;resize:none;line-height:1.6;
+}
+textarea::placeholder{color:var(--text3)}
+.input-footer{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:8px;padding-top:8px;border-top:1px solid var(--border);
+}
+.hint{font-size:12px;color:var(--text3)}
+
+/* dump items */
+.dump-item{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:12px 14px;margin-bottom:8px;
+  transition:border-color 0.15s;
+}
+.dump-item:hover{border-color:#C8C5BE}
+.dump-text{font-size:14px;color:var(--text);margin-bottom:8px;line-height:1.6}
+.dump-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.tag{font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.tag-purple{background:var(--tag-purple-bg);color:var(--tag-purple-fg)}
+.tag-teal{background:var(--tag-teal-bg);color:var(--tag-teal-fg)}
+.tag-coral{background:var(--tag-coral-bg);color:var(--tag-coral-fg)}
+.tag-amber{background:var(--tag-amber-bg);color:var(--tag-amber-fg)}
+.tag-blue{background:var(--tag-blue-bg);color:var(--tag-blue-fg)}
+.tag-gray{background:var(--tag-gray-bg);color:var(--tag-gray-fg)}
+.tag-suggest{
+  font-size:11px;padding:3px 9px;border-radius:20px;
+  background:#E6F1FB;color:#0C447C;cursor:pointer;
+  border:1px solid #B5D4F4;transition:opacity 0.1s;
+  font-family:'IBM Plex Sans KR',sans-serif;
+}
+.tag-suggest:hover{opacity:0.75}
+.dump-date{font-size:11px;color:var(--text3);margin-left:auto}
+select.tag-select{
+  font-size:12px;padding:3px 6px;border:1px solid var(--border);
+  border-radius:20px;background:var(--surface);color:var(--text2);
+  outline:none;font-family:'IBM Plex Sans KR',sans-serif;cursor:pointer;
+}
+
+/* projects */
+.proj-header-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.proj-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:1.25rem;margin-bottom:10px;
+}
+.proj-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.proj-name{font-size:15px;font-weight:500}
+.status-pill{
+  font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;
+  cursor:pointer;white-space:nowrap;transition:opacity 0.1s;
+}
+.status-pill:hover{opacity:0.75}
+.status-active{background:var(--tag-teal-bg);color:var(--tag-teal-fg)}
+.status-paused{background:var(--tag-amber-bg);color:var(--tag-amber-fg)}
+.status-done{background:var(--tag-gray-bg);color:var(--tag-gray-fg)}
+.proj-note{font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6}
+.progress-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+input[type=range]{flex:1;height:4px;accent-color:var(--text);cursor:pointer}
+.prog-num{font-size:12px;color:var(--text2);min-width:36px;text-align:right}
+.progress-track{height:3px;background:var(--surface2);border-radius:3px;margin-bottom:10px}
+.progress-fill{height:100%;background:var(--text);border-radius:3px;transition:width 0.3s}
+.proj-log{
+  font-size:12px;color:var(--text3);
+  border-left:2px solid var(--border);
+  padding-left:10px;line-height:1.9;margin-bottom:8px;
+}
+.add-form{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:12px;padding:1.25rem;margin-bottom:12px;
+}
+.form-label{font-size:12px;color:var(--text3);margin-bottom:4px;display:block}
+.form-input{
+  width:100%;padding:8px 10px;
+  border:1px solid var(--border);border-radius:8px;
+  font-size:14px;font-family:'IBM Plex Sans KR',sans-serif;
+  background:var(--surface);color:var(--text);outline:none;
+  margin-bottom:10px;
+}
+.form-input:focus{border-color:#A8A59E}
+.form-row{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+.log-input{
+  width:100%;padding:6px 10px;font-size:13px;
+  border:1px solid var(--border);border-radius:8px;
+  font-family:'IBM Plex Sans KR',sans-serif;
+  background:var(--surface);color:var(--text);outline:none;
+}
+.log-input:focus{border-color:#A8A59E}
+
+/* archive */
+.archive-section-label{
+  font-size:11px;color:var(--text3);letter-spacing:0.8px;
+  text-transform:uppercase;margin:20px 0 10px;
+}
+.archive-item{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:12px 14px;margin-bottom:8px;opacity:0.8;
+}
+.archive-item:hover{opacity:1}
+
+/* setup notice */
+.setup-notice{
+  background:#FAEEDA;border:1px solid #E8D5A8;border-radius:10px;
+  padding:12px 16px;margin-bottom:16px;font-size:13px;color:#633806;
+  line-height:1.7;
+}
+.setup-notice code{
+  background:rgba(0,0,0,0.07);padding:1px 5px;border-radius:4px;
+  font-family:monospace;font-size:12px;
+}
+
+/* empty */
+.empty-state{text-align:center;padding:3rem 0;color:var(--text3);font-size:14px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div>
+      <h1>나의 뇌</h1>
+      <p>브레인덤프 & 프로젝트 트래커</p>
+    </div>
+    <div class="header-actions">
+      <span id="syncBadge" class="sync-badge"></span>
+      <button class="btn btn-sm" onclick="exportData()" title="JSON으로 내보내기">↓ 내보내기</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('dump')">브레인덤프</button>
+    <button class="tab" onclick="switchTab('projects')">프로젝트</button>
+    <button class="tab" onclick="switchTab('archive')">아카이브</button>
+  </div>
+</header>
+
+<main>
+  <!-- ===== DUMP TAB ===== -->
+  <div id="tab-dump" class="section active">
+    <div id="setupNotice" style="display:none" class="setup-notice">
+      💾 지금은 <strong>이 기기에만</strong> 저장돼. 다기기 동기화 하려면
+      <a href="https://supabase.com" target="_blank" style="color:inherit">Supabase</a> 무료 계정 만들고
+      코드의 <code>SUPABASE_URL</code>과 <code>SUPABASE_KEY</code>를 채워넣어.
+    </div>
+    <input class="search-input" id="searchInput" placeholder="검색..." oninput="renderDumps()" />
+    <div class="dump-input-area">
+      <span class="dump-label">머릿속에 있는 거 다 던져</span>
+      <textarea id="dumpInput" placeholder="하고싶은 것, 아이디어, 배우고싶은 것 뭐든..." onkeydown="handleKey(event)"></textarea>
+      <div class="input-footer">
+        <span class="hint">⌘+Enter 또는 버튼</span>
+        <button class="btn btn-dark" onclick="addDump()">던지기</button>
+      </div>
+    </div>
+    <div id="dumpList"></div>
+  </div>
+
+  <!-- ===== PROJECTS TAB ===== -->
+  <div id="tab-projects" class="section">
+    <div class="proj-header-row">
+      <span style="font-size:13px;color:var(--text3)" id="projCount"></span>
+      <button class="btn btn-dark btn-sm" onclick="toggleForm()">+ 새 프로젝트</button>
+    </div>
+    <div id="addForm" style="display:none" class="add-form">
+      <span class="form-label">프로젝트 이름</span>
+      <input class="form-input" id="pName" placeholder="예: 옷 만들기" />
+      <span class="form-label">지금 어디쯤인지, 고민되는 것</span>
+      <textarea class="form-input" id="pNote" placeholder="현재 상황이나 막히는 부분..." style="min-height:60px;resize:none"></textarea>
+      <span class="form-label">진행도 <span id="pProgLabel">30</span>%</span>
+      <input type="range" style="width:100%;margin-bottom:12px" min="0" max="100" value="30" step="1"
+        oninput="document.getElementById('pProgLabel').textContent=this.value" id="pProg"/>
+      <div class="form-row">
+        <button class="btn btn-sm" onclick="toggleForm()">취소</button>
+        <button class="btn btn-dark btn-sm" onclick="addProject()">추가</button>
+      </div>
+    </div>
+    <div id="projectList"></div>
+  </div>
+
+  <!-- ===== ARCHIVE TAB ===== -->
+  <div id="tab-archive" class="section">
+    <div id="archiveList"></div>
+  </div>
+</main>
+
+<script>
+// ============================================================
+// ⚙️  SUPABASE 설정
+//
+// 1. https://supabase.com 에서 무료 프로젝트 만들기
+// 2. Project Settings → API 에서 URL 과 anon/public 키 복사
+// 3. 아래 두 줄 교체 후 커밋
+// 4. Supabase SQL Editor 에서 아래 SQL 실행 (딱 한 번만):
+//
+// create table dumps (
+//   id bigserial primary key,
+//   text text not null,
+//   tag text default 'gray',
+//   confirmed boolean default false,
+//   archived boolean default false,
+//   date text,
+//   created_at timestamptz default now()
+// );
+// create table projects (
+//   id bigserial primary key,
+//   name text not null,
+//   note text default '',
+//   progress int default 30,
+//   status text default 'active',
+//   log jsonb default '[]',
+//   portfolio boolean default false,
+//   created_at timestamptz default now()
+// );
+// alter table dumps enable row level security;
+// alter table projects enable row level security;
+// create policy "Public" on dumps for all using (true);
+// create policy "Public" on projects for all using (true);
+// ============================================================
+const SUPABASE_URL = window.SUPABASE_URL || '';
+const SUPABASE_KEY = window.SUPABASE_KEY || '';
+
+const USE_SUPABASE = SUPABASE_URL.startsWith('https://');
+const sb = USE_SUPABASE ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+
+// ============================================================
+// STATE
+// ============================================================
+const COLOR_MAP = {
+  purple:'아이디어', teal:'배움', coral:'만들기',
+  amber:'일상', blue:'앱·기술', gray:'기타'
+};
+const STATUS_LABELS = { active:'진행 중', paused:'잠시 멈춤', done:'완료' };
+const STATUS_CLASSES = { active:'status-active', paused:'status-paused', done:'status-done' };
+
+let dumps = [];
+let projects = [];
+
+// ============================================================
+// SYNC BADGE
+// ============================================================
+function badge(state) {
+  const el = document.getElementById('syncBadge');
+  if (!el) return;
+  const map = {
+    ok:     { text: USE_SUPABASE ? '☁️ 동기화됨' : '💾 로컬 저장', cls: USE_SUPABASE ? 'sync-ok' : 'sync-local' },
+    saving: { text: '저장 중…',    cls: 'sync-saving' },
+    error:  { text: '⚠️ 저장 실패', cls: 'sync-error'  },
+  };
+  const s = map[state] || map.ok;
+  el.textContent = s.text;
+  el.className = 'sync-badge ' + s.cls;
+}
+
+// ============================================================
+// LOCAL STORAGE (fallback)
+// ============================================================
+function lsSave(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {} }
+function lsLoad(key, def) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch(e) { return def; } }
+function saveLocal() { if (!sb) { lsSave('dumps', dumps); lsSave('projects', projects); } }
+
+// ============================================================
+// DB HELPERS
+// ============================================================
+async function dbInsertDump(d) {
+  if (!sb) return { ...d, id: Date.now() };
+  const { data, error } = await sb.from('dumps').insert({
+    text: d.text, tag: d.tag, confirmed: d.confirmed,
+    archived: false, date: d.date
+  }).select().single();
+  if (error) throw error;
+  return data;
+}
+async function dbUpdateDump(id, updates) {
+  if (!sb) { saveLocal(); return; }
+  const { error } = await sb.from('dumps').update(updates).eq('id', id);
+  if (error) throw error;
+}
+async function dbDeleteDump(id) {
+  if (!sb) { saveLocal(); return; }
+  const { error } = await sb.from('dumps').delete().eq('id', id);
+  if (error) throw error;
+}
+async function dbInsertProject(p) {
+  if (!sb) return { ...p, id: Date.now() };
+  const { data, error } = await sb.from('projects').insert({
+    name: p.name, note: p.note, progress: p.progress,
+    status: p.status, log: p.log, portfolio: false
+  }).select().single();
+  if (error) throw error;
+  return data;
+}
+async function dbUpdateProject(id, updates) {
+  if (!sb) { saveLocal(); return; }
+  const { error } = await sb.from('projects').update(updates).eq('id', id);
+  if (error) throw error;
+}
+async function dbDeleteProject(id) {
+  if (!sb) { saveLocal(); return; }
+  const { error } = await sb.from('projects').delete().eq('id', id);
+  if (error) throw error;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+async function init() {
+  badge('saving');
+
+  // Show setup notice when not using Supabase
+  if (!USE_SUPABASE) {
+    const n = document.getElementById('setupNotice');
+    if (n) n.style.display = 'block';
+  }
+
+  try {
+    if (sb) {
+      const [{ data: d, error: e1 }, { data: p, error: e2 }] = await Promise.all([
+        sb.from('dumps').select('*').order('created_at', { ascending: false }),
+        sb.from('projects').select('*').order('created_at', { ascending: false })
+      ]);
+      if (e1 || e2) throw e1 || e2;
+
+      dumps    = (d || []);
+      projects = (p || []);
+
+      // One-time migration from localStorage → Supabase
+      const lsDumps    = lsLoad('dumps', []);
+      const lsProjects = lsLoad('projects', []);
+      if (dumps.length === 0 && lsDumps.some(d => d.date !== '예시')) {
+        for (const item of lsDumps) {
+          if (item.date === '예시') continue;
+          const { data } = await sb.from('dumps').insert({
+            text: item.text, tag: item.tag || 'gray',
+            confirmed: item.confirmed || false,
+            archived: item.archived || false, date: item.date
+          }).select().single();
+          if (data) dumps.unshift(data);
+        }
+        for (const item of lsProjects) {
+          if (item.id <= 2 && !lsLoad('_migrated', false)) continue; // skip examples
+          const { data } = await sb.from('projects').insert({
+            name: item.name, note: item.note || '', progress: item.progress || 0,
+            status: item.status || 'active', log: item.log || [], portfolio: false
+          }).select().single();
+          if (data) projects.push(data);
+        }
+        localStorage.removeItem('dumps');
+        localStorage.removeItem('projects');
+        lsSave('_migrated', true);
+      }
+    } else {
+      dumps    = lsLoad('dumps',    exampleDumps());
+      projects = lsLoad('projects', exampleProjects());
+    }
+    badge('ok');
+  } catch(err) {
+    console.error('init error:', err);
+    dumps    = lsLoad('dumps',    exampleDumps());
+    projects = lsLoad('projects', exampleProjects());
+    badge('error');
+  }
+
+  renderDumps();
+  renderProjects();
+  renderArchive();
+}
+
+function exampleDumps() {
+  return [
+    { id:1, text:'니팅으로 만든 스웨터 패턴 정리하기', tag:'teal',  confirmed:true,  archived:false, date:'예시' },
+    { id:2, text:'옷 만들기 과정을 영상으로 기록해볼까?', tag:'coral', confirmed:true, archived:false, date:'예시' },
+  ];
+}
+function exampleProjects() {
+  return [
+    { id:1, name:'니팅 (수편기)', note:'클래스 수료. 다음 단계: 직접 패턴 짜보기', progress:60, status:'active', log:['클래스 완료'], portfolio:false },
+    { id:2, name:'옷 만들기',     note:'패턴, 리서치, 메이킹 공부 중. 원단 선정 고민 중.',   progress:30, status:'active', log:['패턴 공부 시작'], portfolio:false },
+  ];
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function switchTab(t) {
+  document.querySelectorAll('.tab').forEach((el, i) =>
+    el.classList.toggle('active', ['dump','projects','archive'][i] === t)
+  );
+  document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + t).classList.add('active');
+}
+
+// ============================================================
+// AUTO-TAG (keyword matching — works offline, no API needed)
+// ============================================================
+function autoTag(text) {
+  const t = text.toLowerCase();
+  const kw = {
+    coral: ['만들','제작','diy','니팅','뜨개','옷','패턴','봉제','재봉','공예','크래프트','그리기','그림','촬영','영상'],
+    teal:  ['배우','공부','책','강의','클래스','수업','학습','이해','알고싶','읽','습득'],
+    blue:  ['앱','코딩','개발','기술','프로그램','웹','ai','자동화','코드','사이트','서비스','툴'],
+    amber: ['오늘','내일','루틴','매일','식단','운동','청소','정리','습관','일상','해야'],
+    purple:['아이디어','생각','어떨까','만약','가능','해보고싶','해볼까','궁금','흥미','새로운'],
+  };
+  for (const [tag, words] of Object.entries(kw)) {
+    if (words.some(w => t.includes(w))) return tag;
+  }
+  return 'gray';
+}
+
+// ============================================================
+// DUMP FUNCTIONS
+// ============================================================
+function handleKey(e) { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') addDump(); }
+
+function formatDate() {
+  const d = new Date();
+  return `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+async function addDump() {
+  const el = document.getElementById('dumpInput');
+  const text = el.value.trim();
+  if (!text) return;
+  el.value = '';
+
+  const tag    = autoTag(text);
+  const tempId = 'tmp_' + Date.now();
+  const newD   = { id: tempId, text, tag, confirmed: false, archived: false, date: formatDate() };
+  dumps.unshift(newD);
+  renderDumps();
+  badge('saving');
+
+  try {
+    const saved = await dbInsertDump(newD);
+    const idx = dumps.findIndex(d => d.id === tempId);
+    if (idx !== -1) dumps[idx] = saved;
+    saveLocal();
+    badge('ok');
+    renderDumps();
+  } catch(err) {
+    console.error(err); badge('error');
+  }
+}
+
+async function confirmTag(id) {
+  const d = dumps.find(d => d.id == id);
+  if (!d) return;
+  d.confirmed = true;
+  badge('saving'); renderDumps();
+  try { await dbUpdateDump(id, { confirmed: true }); saveLocal(); badge('ok'); }
+  catch(err) { badge('error'); }
+}
+
+async function changeTag(id, val) {
+  const d = dumps.find(d => d.id == id);
+  if (!d || !val) return;
+  d.tag = val; d.confirmed = false;
+  badge('saving'); renderDumps();
+  try { await dbUpdateDump(id, { tag: val, confirmed: false }); saveLocal(); badge('ok'); }
+  catch(err) { badge('error'); }
+}
+
+async function archiveDump(id) {
+  const d = dumps.find(d => d.id == id);
+  if (!d) return;
+  d.archived = true;
+  badge('saving'); renderDumps(); renderArchive();
+  try { await dbUpdateDump(id, { archived: true }); saveLocal(); badge('ok'); }
+  catch(err) { badge('error'); }
+}
+
+async function unarchiveDump(id) {
+  const d = dumps.find(d => d.id == id);
+  if (!d) return;
+  d.archived = false;
+  badge('saving'); renderDumps(); renderArchive();
+  try { await dbUpdateDump(id, { archived: false }); saveLocal(); badge('ok'); }
+  catch(err) { badge('error'); }
+}
+
+async function deleteDump(id) {
+  dumps = dumps.filter(d => d.id != id);
+  badge('saving'); renderDumps(); renderArchive();
+  try { await dbDeleteDump(id); saveLocal(); badge('ok'); }
+  catch(err) { badge('error'); }
+}
+
+function renderDumps() {
+  const el = document.getElementById('dumpList');
+  const q  = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
+  const active = dumps.filter(d => !d.archived && (!q || d.text.toLowerCase().includes(q)));
+
+  if (!active.length) {
+    el.innerHTML = q
+      ? `<div class="empty-state">"${esc(q)}" 검색 결과 없음</div>`
+      : '<div class="empty-state">던진 것들이 여기 쌓여</div>';
+    return;
+  }
+  el.innerHTML = active.map(d => `
+    <div class="dump-item">
+      <div class="dump-text">${esc(d.text)}</div>
+      <div class="dump-meta">
+        ${d.tag ? `<span class="tag tag-${d.tag}">${COLOR_MAP[d.tag] || d.tag}</span>` : ''}
+        ${!d.confirmed && d.tag ? `<button class="tag-suggest" onclick="confirmTag(${q_(d.id)})">✓ 확정</button>` : ''}
+        ${!d.confirmed ? `<select class="tag-select" onchange="changeTag(${q_(d.id)},this.value)">
+          <option value="">태그 바꾸기</option>
+          ${Object.entries(COLOR_MAP).map(([k,v]) =>
+            `<option value="${k}"${d.tag===k?' selected':''}>${v}</option>`).join('')}
+        </select>` : ''}
+        ${d.confirmed ? `<span style="font-size:11px;color:var(--text3)">✓</span>` : ''}
+        <span class="dump-date">${d.date || ''}</span>
+        <button class="btn-ghost" onclick="archiveDump(${q_(d.id)})" title="보관하기">📦</button>
+        <button class="btn-ghost" onclick="deleteDump(${q_(d.id)})" title="삭제">×</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// PROJECT FUNCTIONS
+// ============================================================
+function toggleForm() {
+  const f = document.getElementById('addForm');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+  if (f.style.display === 'block') document.getElementById('pName').focus();
+}
+
+async function addProject() {
+  const name     = document.getElementById('pName').value.trim();
+  const note     = document.getElementById('pNote').value.trim();
+  const progress = parseInt(document.getElementById('pProg').value);
+  if (!name) return;
+
+  const tempId = 'tmp_' + Date.now();
+  const newP   = { id: tempId, name, note, progress, status: 'active', log: [], portfolio: false };
+  projects.push(newP);
+
+  document.getElementById('pName').value = '';
+  document.getElementById('pNote').value = '';
+  document.getElementById('pProg').value = 30;
+  document.getElementById('pProgLabel').textContent = 30;
+  toggleForm(); renderProjects();
+  badge('saving');
+
+  try {
+    const saved = await dbInsertProject(newP);
+    const idx = projects.findIndex(p => p.id === tempId);
+    if (idx !== -1) projects[idx] = saved;
+    saveLocal(); badge('ok'); renderProjects();
+  } catch(err) {
+    console.error(err); badge('error');
+  }
+}
+
+async function updateProg(id, val) {
+  const p = projects.find(p => p.id == id);
+  if (!p) return;
+  p.progress = parseInt(val);
+  const numEl  = document.getElementById('pn-' + id);
+  const fillEl = document.getElementById('pf-' + id);
+  if (numEl)  numEl.textContent  = val + '%';
+  if (fillEl) fillEl.style.width = val + '%';
+  try { await dbUpdateProject(id, { progress: p.progress }); saveLocal(); }
+  catch(err) { console.error(err); }
+}
+
+async function toggleStatus(id) {
+  const p = projects.find(p => p.id == id);
+  if (!p) return;
+  const cycle = { active:'paused', paused:'done', done:'active' };
+  p.status = cycle[p.status] || 'active';
+  badge('saving'); renderProjects(); renderArchive();
+  try { await dbUpdateProject(id, { status: p.status }); saveLocal(); badge('ok'); }
+  catch(err) { badge('error'); }
+}
+
+async function addLog(id) {
+  const inp  = document.getElementById('log-' + id);
+  const text = inp.value.trim();
+  if (!text) return;
+  const p = projects.find(p => p.id == id);
+  if (!p) return;
+  if (!p.log) p.log = [];
+  const d = new Date();
+  p.log.push(`${d.getMonth()+1}/${d.getDate()} — ${text}`);
+  inp.value = '';
+  badge('saving'); renderProjects();
+  try { await dbUpdateProject(id, { log: p.log }); saveLocal(); badge('ok'); }
+  catch(err) { badge('error'); }
+}
+
+async function deleteProject(id) {
+  projects = projects.filter(p => p.id != id);
+  badge('saving'); renderProjects(); renderArchive();
+  try { await dbDeleteProject(id); saveLocal(); badge('ok'); }
+  catch(err) { badge('error'); }
+}
+
+async function togglePortfolio(id) {
+  const p = projects.find(p => p.id == id);
+  if (!p) return;
+  p.portfolio = !p.portfolio;
+  badge('saving'); renderProjects(); renderArchive();
+  try { await dbUpdateProject(id, { portfolio: p.portfolio }); saveLocal(); badge('ok'); }
+  catch(err) { badge('error'); }
+}
+
+function renderProjects() {
+  const active = projects.filter(p => p.status !== 'done');
+  document.getElementById('projCount').textContent = `${active.length}개 진행 중`;
+  const el = document.getElementById('projectList');
+  if (!active.length) { el.innerHTML = '<div class="empty-state">프로젝트를 추가해봐</div>'; return; }
+  el.innerHTML = active.map(p => `
+    <div class="proj-card">
+      <div class="proj-card-header">
+        <span class="proj-name">${esc(p.name)}</span>
+        <div style="display:flex;gap:6px;align-items:center">
+          ${p.portfolio ? '<span title="포트폴리오에 표시됨">⭐</span>' : ''}
+          <span class="status-pill ${STATUS_CLASSES[p.status] || 'status-active'}" onclick="toggleStatus(${q_(p.id)})">
+            ${STATUS_LABELS[p.status] || p.status}
+          </span>
+          <button class="btn-ghost" onclick="deleteProject(${q_(p.id)})" title="삭제">×</button>
+        </div>
+      </div>
+      ${p.note ? `<div class="proj-note">${esc(p.note)}</div>` : ''}
+      <div class="progress-row">
+        <input type="range" min="0" max="100" value="${p.progress}" step="1"
+          oninput="updateProg(${q_(p.id)},this.value)" />
+        <span class="prog-num" id="pn-${p.id}">${p.progress}%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="pf-${p.id}" style="width:${p.progress}%"></div>
+      </div>
+      ${p.log && p.log.length ? `<div class="proj-log">${p.log.map(esc).join('<br>')}</div>` : ''}
+      <div style="margin-top:8px;display:flex;gap:6px;align-items:center">
+        <input class="log-input" id="log-${p.id}" placeholder="기록 추가…"
+          onkeydown="if(event.key==='Enter')addLog(${q_(p.id)})" style="flex:1"/>
+        <button class="btn btn-sm" onclick="addLog(${q_(p.id)})">추가</button>
+        <button class="btn btn-sm" onclick="togglePortfolio(${q_(p.id)})" title="${p.portfolio?'포트폴리오에서 제거':'포트폴리오에 추가'}">⭐</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// ARCHIVE
+// ============================================================
+function renderArchive() {
+  const el          = document.getElementById('archiveList');
+  const archived    = dumps.filter(d => d.archived);
+  const done        = projects.filter(p => p.status === 'done');
+  const portfolio   = projects.filter(p => p.portfolio && p.status !== 'done');
+
+  if (!archived.length && !done.length && !portfolio.length) {
+    el.innerHTML = '<div class="empty-state">완료하거나 보관한 것들이 여기 쌓여</div>';
+    return;
+  }
+
+  let html = '';
+
+  if (portfolio.length) {
+    html += '<div class="archive-section-label">⭐ 포트폴리오 후보</div>';
+    html += portfolio.map(p => `
+      <div class="archive-item">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong style="font-size:14px">${esc(p.name)}</strong>
+          <div style="display:flex;gap:6px">
+            <span class="status-pill ${STATUS_CLASSES[p.status]||'status-active'}">${STATUS_LABELS[p.status]||''}</span>
+            <button class="btn-ghost" onclick="togglePortfolio(${q_(p.id)})" title="포트폴리오 해제">★</button>
+          </div>
+        </div>
+        ${p.note ? `<div style="font-size:13px;color:var(--text2);margin-top:4px">${esc(p.note)}</div>` : ''}
+        <div style="margin-top:6px">
+          <div class="progress-track" style="margin-bottom:0">
+            <div class="progress-fill" style="width:${p.progress}%"></div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  if (done.length) {
+    html += '<div class="archive-section-label">✓ 완료된 프로젝트</div>';
+    html += done.map(p => `
+      <div class="archive-item">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <strong style="font-size:14px">${esc(p.name)}</strong>
+            ${p.portfolio ? ' <span title="포트폴리오">⭐</span>' : ''}
+            ${p.note ? `<div style="font-size:13px;color:var(--text2);margin-top:4px">${esc(p.note)}</div>` : ''}
+            ${p.log && p.log.length ? `<div class="proj-log" style="margin-top:6px">${p.log.map(esc).join('<br>')}</div>` : ''}
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0;margin-left:12px">
+            <button class="btn btn-sm" onclick="toggleStatus(${q_(p.id)})" title="다시 시작">↩ 다시</button>
+            <button class="btn-ghost" onclick="deleteProject(${q_(p.id)})">×</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  if (archived.length) {
+    html += '<div class="archive-section-label">📦 보관된 생각들</div>';
+    html += archived.map(d => `
+      <div class="archive-item">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div style="font-size:14px;margin-bottom:6px">${esc(d.text)}</div>
+            ${d.tag ? `<span class="tag tag-${d.tag}">${COLOR_MAP[d.tag]||d.tag}</span>` : ''}
+          </div>
+          <div style="display:flex;gap:4px;align-items:center;flex-shrink:0;margin-left:12px">
+            <span style="font-size:11px;color:var(--text3)">${d.date||''}</span>
+            <button class="btn-ghost" onclick="unarchiveDump(${q_(d.id)})" title="다시 가져오기">↩</button>
+            <button class="btn-ghost" onclick="deleteDump(${q_(d.id)})">×</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  el.innerHTML = html;
+}
+
+// ============================================================
+// EXPORT
+// ============================================================
+function exportData() {
+  const payload = {
+    exported_at: new Date().toISOString(),
+    dumps, projects
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `나의뇌_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function esc(s) {
+  return String(s||'')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function q_(id) { return JSON.stringify(id); }
+
+// ============================================================
+// BOOT
+// ============================================================
+init();
+</script>
+</body>
+</html>
