@@ -3,456 +3,643 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>나의 뇌 — 브레인덤프 & 프로젝트</title>
+<title>ëì ë</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500&display=swap');
 
-  *{box-sizing:border-box;margin:0;padding:0}
-  :root{
-    --bg:#F7F6F3;
-    --surface:#FFFFFF;
-    --surface2:#F0EEE9;
-    --border:#E0DDD6;
-    --text:#1A1917;
-    --text2:#6B6860;
-    --text3:#A8A59E;
-    --accent:#1A1917;
-    --tag-purple-bg:#EEEDFE;--tag-purple-fg:#3C3489;
-    --tag-teal-bg:#E1F5EE;--tag-teal-fg:#085041;
-    --tag-coral-bg:#FAECE7;--tag-coral-fg:#712B13;
-    --tag-amber-bg:#FAEEDA;--tag-amber-fg:#633806;
-    --tag-blue-bg:#E6F1FB;--tag-blue-fg:#0C447C;
-    --tag-gray-bg:#F1EFE8;--tag-gray-fg:#444441;
-  }
-  body{
-    font-family:'IBM Plex Sans KR',sans-serif;
-    background:var(--bg);
-    color:var(--text);
-    min-height:100vh;
-    font-size:15px;
-    line-height:1.6;
-  }
-  header{
-    padding:2rem 2rem 0;
-    max-width:720px;
-    margin:0 auto;
-  }
-  header h1{
-    font-size:22px;
-    font-weight:500;
-    letter-spacing:-0.3px;
-  }
-  header p{
-    font-size:13px;
-    color:var(--text3);
-    margin-top:4px;
-  }
-  .tabs{
-    display:flex;
-    gap:0;
-    margin-top:1.5rem;
-    border-bottom:1px solid var(--border);
-  }
-  .tab{
-    padding:10px 20px;
-    font-size:14px;
-    font-family:'IBM Plex Sans KR',sans-serif;
-    cursor:pointer;
-    border:none;
-    background:none;
-    color:var(--text2);
-    border-bottom:2px solid transparent;
-    margin-bottom:-1px;
-    transition:color 0.15s;
-  }
-  .tab.active{color:var(--text);border-bottom-color:var(--text);font-weight:500;}
-  .tab:hover{color:var(--text)}
-  main{max-width:720px;margin:0 auto;padding:1.5rem 2rem 4rem;}
-  .section{display:none}.section.active{display:block}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F7F6F3;
+  --surface:#FFFFFF;
+  --surface2:#F0EEE9;
+  --border:#E0DDD6;
+  --text:#1A1917;
+  --text2:#6B6860;
+  --text3:#A8A59E;
+  --tag-purple-bg:#EEEDFE;--tag-purple-fg:#3C3489;
+  --tag-teal-bg:#E1F5EE;--tag-teal-fg:#085041;
+  --tag-coral-bg:#FAECE7;--tag-coral-fg:#712B13;
+  --tag-amber-bg:#FAEEDA;--tag-amber-fg:#633806;
+  --tag-blue-bg:#E6F1FB;--tag-blue-fg:#0C447C;
+  --tag-gray-bg:#F1EFE8;--tag-gray-fg:#444441;
+}
+body{
+  font-family:'IBM Plex Sans KR',sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;font-size:15px;line-height:1.6;
+}
+header{padding:2rem 2rem 0;max-width:720px;margin:0 auto}
+.header-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
+header h1{font-size:22px;font-weight:500;letter-spacing:-0.3px}
+header p{font-size:13px;color:var(--text3);margin-top:4px}
+.header-actions{display:flex;gap:8px;align-items:center;padding-top:4px}
 
-  /* dump */
-  .dump-input-area{
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:12px;
-    padding:1rem 1.25rem;
-    margin-bottom:1.5rem;
-  }
-  .dump-label{font-size:12px;color:var(--text3);margin-bottom:8px;display:block}
-  textarea{
-    width:100%;
-    min-height:72px;
-    border:none;
-    outline:none;
-    font-size:15px;
-    font-family:'IBM Plex Sans KR',sans-serif;
-    color:var(--text);
-    background:transparent;
-    resize:none;
-    line-height:1.6;
-  }
-  textarea::placeholder{color:var(--text3)}
-  .input-footer{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
-  .hint{font-size:12px;color:var(--text3)}
-  .btn{
-    padding:7px 16px;
-    border:1px solid var(--border);
-    border-radius:8px;
-    background:none;
-    font-size:13px;
-    font-family:'IBM Plex Sans KR',sans-serif;
-    cursor:pointer;
-    color:var(--text);
-    transition:background 0.1s;
-  }
-  .btn:hover{background:var(--surface2)}
-  .btn-dark{background:var(--text);color:#fff;border-color:var(--text)}
-  .btn-dark:hover{background:#333}
-  .btn-sm{padding:4px 10px;font-size:12px}
+/* sync badge */
+.sync-badge{
+  font-size:11px;padding:3px 10px;border-radius:20px;
+  background:var(--surface2);color:var(--text3);white-space:nowrap;
+  transition:all 0.2s;
+}
+.sync-ok{background:#E1F5EE;color:#085041}
+.sync-saving{background:#FAEEDA;color:#633806}
+.sync-local{background:#F1EFE8;color:#444441}
+.sync-error{background:#FAECE7;color:#712B13}
 
-  .dump-item{
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:10px;
-    padding:12px 14px;
-    margin-bottom:8px;
-    transition:border-color 0.15s;
-  }
-  .dump-item:hover{border-color:#C8C5BE}
-  .dump-text{font-size:14px;color:var(--text);margin-bottom:8px;line-height:1.6}
-  .dump-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-  .tag{font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px;white-space:nowrap}
-  .tag-purple{background:var(--tag-purple-bg);color:var(--tag-purple-fg)}
-  .tag-teal{background:var(--tag-teal-bg);color:var(--tag-teal-fg)}
-  .tag-coral{background:var(--tag-coral-bg);color:var(--tag-coral-fg)}
-  .tag-amber{background:var(--tag-amber-bg);color:var(--tag-amber-fg)}
-  .tag-blue{background:var(--tag-blue-bg);color:var(--tag-blue-fg)}
-  .tag-gray{background:var(--tag-gray-bg);color:var(--tag-gray-fg)}
-  .tag-suggest{
-    font-size:11px;padding:3px 9px;border-radius:20px;
-    background:#E6F1FB;color:#0C447C;
-    cursor:pointer;border:1px solid #B5D4F4;
-    transition:opacity 0.1s;
-  }
-  .tag-suggest:hover{opacity:0.75}
-  .dump-date{font-size:11px;color:var(--text3);margin-left:auto}
-  .del-btn{
-    background:none;border:none;cursor:pointer;
-    color:var(--text3);font-size:14px;padding:0 2px;
-    transition:color 0.1s;
-  }
-  .del-btn:hover{color:var(--text)}
-  .thinking{font-size:12px;color:#185FA5;font-style:italic}
-  select.tag-select{
-    font-size:12px;padding:3px 6px;border:1px solid var(--border);
-    border-radius:20px;background:var(--surface);color:var(--text2);
-    outline:none;font-family:'IBM Plex Sans KR',sans-serif;cursor:pointer;
-  }
-  .empty-state{text-align:center;padding:3rem 0;color:var(--text3);font-size:14px}
+/* tabs */
+.tabs{display:flex;margin-top:1.5rem;border-bottom:1px solid var(--border)}
+.tab{
+  padding:10px 20px;font-size:14px;
+  font-family:'IBM Plex Sans KR',sans-serif;
+  cursor:pointer;border:none;background:none;color:var(--text2);
+  border-bottom:2px solid transparent;margin-bottom:-1px;transition:color 0.15s;
+}
+.tab.active{color:var(--text);border-bottom-color:var(--text);font-weight:500}
+.tab:hover{color:var(--text)}
 
-  /* projects */
-  .proj-header-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
-  .proj-card{
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:12px;
-    padding:1.25rem;
-    margin-bottom:10px;
-  }
-  .proj-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
-  .proj-name{font-size:15px;font-weight:500}
-  .status-pill{
-    font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;cursor:pointer;
-    white-space:nowrap;transition:opacity 0.1s;
-  }
-  .status-pill:hover{opacity:0.75}
-  .status-active{background:var(--tag-teal-bg);color:var(--tag-teal-fg)}
-  .status-paused{background:var(--tag-amber-bg);color:var(--tag-amber-fg)}
-  .proj-note{font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6}
-  .progress-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-  input[type=range]{
-    flex:1;height:4px;accent-color:var(--text);cursor:pointer;
-  }
-  .prog-num{font-size:12px;color:var(--text2);min-width:32px;text-align:right}
-  .progress-track{height:3px;background:var(--surface2);border-radius:3px;margin-bottom:10px}
-  .progress-fill{height:100%;background:var(--text);border-radius:3px;transition:width 0.3s}
-  .proj-log{
-    font-size:12px;color:var(--text3);
-    border-left:2px solid var(--border);
-    padding-left:10px;line-height:1.8;
-  }
-  .proj-actions{display:flex;gap:6px;margin-top:10px}
+main{max-width:720px;margin:0 auto;padding:1.5rem 2rem 4rem}
+.section{display:none}.section.active{display:block}
 
-  .add-form{
-    background:var(--surface2);
-    border:1px solid var(--border);
-    border-radius:12px;
-    padding:1.25rem;
-    margin-bottom:12px;
-  }
-  .form-label{font-size:12px;color:var(--text3);margin-bottom:4px;display:block}
-  .form-input{
-    width:100%;padding:8px 10px;
-    border:1px solid var(--border);border-radius:8px;
-    font-size:14px;font-family:'IBM Plex Sans KR',sans-serif;
-    background:var(--surface);color:var(--text);outline:none;
-    margin-bottom:10px;
-  }
-  .form-input:focus{border-color:#A8A59E}
-  .form-row{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+/* search */
+.search-input{
+  width:100%;padding:9px 14px;
+  border:1px solid var(--border);border-radius:10px;
+  font-size:14px;font-family:'IBM Plex Sans KR',sans-serif;
+  background:var(--surface);color:var(--text);outline:none;
+  margin-bottom:12px;
+}
+.search-input:focus{border-color:#A8A59E}
 
-  /* note log textarea */
-  .log-input{
-    width:100%;padding:6px 10px;font-size:13px;
-    border:1px solid var(--border);border-radius:8px;
-    font-family:'IBM Plex Sans KR',sans-serif;
-    background:var(--surface);color:var(--text);outline:none;
-    margin-top:6px;
-  }
-  .log-input:focus{border-color:#A8A59E}
+/* buttons */
+.btn{
+  padding:7px 16px;border:1px solid var(--border);border-radius:8px;
+  background:none;font-size:13px;font-family:'IBM Plex Sans KR',sans-serif;
+  cursor:pointer;color:var(--text);transition:background 0.1s;
+}
+.btn:hover{background:var(--surface2)}
+.btn-dark{background:var(--text);color:#fff;border-color:var(--text)}
+.btn-dark:hover{background:#333}
+.btn-sm{padding:4px 10px;font-size:12px}
+.btn-ghost{
+  background:none;border:none;cursor:pointer;
+  color:var(--text3);font-size:13px;padding:0 3px;transition:color 0.1s;
+  font-family:'IBM Plex Sans KR',sans-serif;
+}
+.btn-ghost:hover{color:var(--text)}
+
+/* dump input */
+.dump-input-area{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.5rem;
+}
+.dump-label{font-size:12px;color:var(--text3);margin-bottom:8px;display:block}
+textarea{
+  width:100%;min-height:72px;border:none;outline:none;
+  font-size:15px;font-family:'IBM Plex Sans KR',sans-serif;
+  color:var(--text);background:transparent;resize:none;line-height:1.6;
+}
+textarea::placeholder{color:var(--text3)}
+.input-footer{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:8px;padding-top:8px;border-top:1px solid var(--border);
+}
+.hint{font-size:12px;color:var(--text3)}
+
+/* dump items */
+.dump-item{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:12px 14px;margin-bottom:8px;
+  transition:border-color 0.15s;
+}
+.dump-item:hover{border-color:#C8C5BE}
+.dump-text{font-size:14px;color:var(--text);margin-bottom:8px;line-height:1.6}
+.dump-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.tag{font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.tag-purple{background:var(--tag-purple-bg);color:var(--tag-purple-fg)}
+.tag-teal{background:var(--tag-teal-bg);color:var(--tag-teal-fg)}
+.tag-coral{background:var(--tag-coral-bg);color:var(--tag-coral-fg)}
+.tag-amber{background:var(--tag-amber-bg);color:var(--tag-amber-fg)}
+.tag-blue{background:var(--tag-blue-bg);color:var(--tag-blue-fg)}
+.tag-gray{background:var(--tag-gray-bg);color:var(--tag-gray-fg)}
+.tag-suggest{
+  font-size:11px;padding:3px 9px;border-radius:20px;
+  background:#E6F1FB;color:#0C447C;cursor:pointer;
+  border:1px solid #B5D4F4;transition:opacity 0.1s;
+  font-family:'IBM Plex Sans KR',sans-serif;
+}
+.tag-suggest:hover{opacity:0.75}
+.dump-date{font-size:11px;color:var(--text3);margin-left:auto}
+select.tag-select{
+  font-size:12px;padding:3px 6px;border:1px solid var(--border);
+  border-radius:20px;background:var(--surface);color:var(--text2);
+  outline:none;font-family:'IBM Plex Sans KR',sans-serif;cursor:pointer;
+}
+
+/* projects */
+.proj-header-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.proj-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:1.25rem;margin-bottom:10px;
+}
+.proj-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.proj-name{font-size:15px;font-weight:500}
+.status-pill{
+  font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;
+  cursor:pointer;white-space:nowrap;transition:opacity 0.1s;
+}
+.status-pill:hover{opacity:0.75}
+.status-active{background:var(--tag-teal-bg);color:var(--tag-teal-fg)}
+.status-paused{background:var(--tag-amber-bg);color:var(--tag-amber-fg)}
+.status-done{background:var(--tag-gray-bg);color:var(--tag-gray-fg)}
+.proj-note{font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6}
+.progress-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+input[type=range]{flex:1;height:4px;accent-color:var(--text);cursor:pointer}
+.prog-num{font-size:12px;color:var(--text2);min-width:36px;text-align:right}
+.progress-track{height:3px;background:var(--surface2);border-radius:3px;margin-bottom:10px}
+.progress-fill{height:100%;background:var(--text);border-radius:3px;transition:width 0.3s}
+.proj-log{
+  font-size:12px;color:var(--text3);
+  border-left:2px solid var(--border);
+  padding-left:10px;line-height:1.9;margin-bottom:8px;
+}
+.add-form{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:12px;padding:1.25rem;margin-bottom:12px;
+}
+.form-label{font-size:12px;color:var(--text3);margin-bottom:4px;display:block}
+.form-input{
+  width:100%;padding:8px 10px;
+  border:1px solid var(--border);border-radius:8px;
+  font-size:14px;font-family:'IBM Plex Sans KR',sans-serif;
+  background:var(--surface);color:var(--text);outline:none;
+  margin-bottom:10px;
+}
+.form-input:focus{border-color:#A8A59E}
+.form-row{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+.log-input{
+  width:100%;padding:6px 10px;font-size:13px;
+  border:1px solid var(--border);border-radius:8px;
+  font-family:'IBM Plex Sans KR',sans-serif;
+  background:var(--surface);color:var(--text);outline:none;
+}
+.log-input:focus{border-color:#A8A59E}
+
+/* archive */
+.archive-section-label{
+  font-size:11px;color:var(--text3);letter-spacing:0.8px;
+  text-transform:uppercase;margin:20px 0 10px;
+}
+.archive-item{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:12px 14px;margin-bottom:8px;opacity:0.8;
+}
+.archive-item:hover{opacity:1}
+
+/* setup notice */
+.setup-notice{
+  background:#FAEEDA;border:1px solid #E8D5A8;border-radius:10px;
+  padding:12px 16px;margin-bottom:16px;font-size:13px;color:#633806;
+  line-height:1.7;
+}
+.setup-notice code{
+  background:rgba(0,0,0,0.07);padding:1px 5px;border-radius:4px;
+  font-family:monospace;font-size:12px;
+}
+
+/* empty */
+.empty-state{text-align:center;padding:3rem 0;color:var(--text3);font-size:14px}
 </style>
 </head>
 <body>
 
 <header>
-  <h1>나의 뇌</h1>
-  <p>브레인덤프 & 프로젝트 트래커</p>
+  <div class="header-top">
+    <div>
+      <h1>ëì ë</h1>
+      <p>ë¸ë ì¸ë¤í & íë¡ì í¸ í¸ëì»¤</p>
+    </div>
+    <div class="header-actions">
+      <span id="syncBadge" class="sync-badge"></span>
+      <button class="btn btn-sm" onclick="exportData()" title="JSONì¼ë¡ ë´ë³´ë´ê¸°">â ë´ë³´ë´ê¸°</button>
+    </div>
+  </div>
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('dump')">브레인덤프</button>
-    <button class="tab" onclick="switchTab('projects')">프로젝트</button>
+    <button class="tab active" onclick="switchTab('dump')">ë¸ë ì¸ë¤í</button>
+    <button class="tab" onclick="switchTab('projects')">íë¡ì í¸</button>
+    <button class="tab" onclick="switchTab('archive')">ìì¹´ì´ë¸</button>
   </div>
 </header>
 
 <main>
-  <!-- DUMP TAB -->
+  <!-- ===== DUMP TAB ===== -->
   <div id="tab-dump" class="section active">
+    <div id="setupNotice" style="display:none" class="setup-notice">
+      ð¾ ì§ê¸ì <strong>ì´ ê¸°ê¸°ìë§</strong> ì ì¥ë¼. ë¤ê¸°ê¸° ëê¸°í íë ¤ë©´
+      <a href="https://supabase.com" target="_blank" style="color:inherit">Supabase</a> ë¬´ë£ ê³ì  ë§ë¤ê³ 
+      ì½ëì <code>SUPABASE_URL</code>ê³¼ <code>SUPABASE_KEY</code>ë¥¼ ì±ìë£ì´.
+    </div>
+    <input class="search-input" id="searchInput" placeholder="ê²ì..." oninput="renderDumps()" />
     <div class="dump-input-area">
-      <span class="dump-label">머릿속에 있는 거 다 던져</span>
-      <textarea id="dumpInput" placeholder="하고싶은 것, 아이디어, 배우고싶은 것 뭐든..." onkeydown="handleKey(event)"></textarea>
+      <span class="dump-label">ë¨¸ë¦¿ìì ìë ê±° ë¤ ëì ¸</span>
+      <textarea id="dumpInput" placeholder="íê³ ì¶ì ê², ìì´ëì´, ë°°ì°ê³ ì¶ì ê² ë­ë ..." onkeydown="handleKey(event)"></textarea>
       <div class="input-footer">
-        <span class="hint">⌘+Enter 또는 버튼</span>
-        <button class="btn btn-dark" onclick="addDump()">던지기</button>
+        <span class="hint">â+Enter ëë ë²í¼</span>
+        <button class="btn btn-dark" onclick="addDump()">ëì§ê¸°</button>
       </div>
     </div>
     <div id="dumpList"></div>
   </div>
 
-  <!-- PROJECTS TAB -->
+  <!-- ===== PROJECTS TAB ===== -->
   <div id="tab-projects" class="section">
     <div class="proj-header-row">
       <span style="font-size:13px;color:var(--text3)" id="projCount"></span>
-      <button class="btn btn-dark btn-sm" onclick="toggleForm()">+ 새 프로젝트</button>
+      <button class="btn btn-dark btn-sm" onclick="toggleForm()">+ ì íë¡ì í¸</button>
     </div>
-
     <div id="addForm" style="display:none" class="add-form">
-      <span class="form-label">프로젝트 이름</span>
-      <input class="form-input" id="pName" placeholder="예: 옷 만들기" />
-      <span class="form-label">지금 어디쯤인지, 고민되는 것</span>
-      <textarea class="form-input" id="pNote" placeholder="현재 상황이나 막히는 부분..." style="min-height:60px;resize:none"></textarea>
-      <span class="form-label">진행도 <span id="pProgLabel">30</span>%</span>
+      <span class="form-label">íë¡ì í¸ ì´ë¦</span>
+      <input class="form-input" id="pName" placeholder="ì: ì· ë§ë¤ê¸°" />
+      <span class="form-label">ì§ê¸ ì´ëì¯¤ì¸ì§, ê³ ë¯¼ëë ê²</span>
+      <textarea class="form-input" id="pNote" placeholder="íì¬ ìí©ì´ë ë§íë ë¶ë¶..." style="min-height:60px;resize:none"></textarea>
+      <span class="form-label">ì§íë <span id="pProgLabel">30</span>%</span>
       <input type="range" style="width:100%;margin-bottom:12px" min="0" max="100" value="30" step="1"
         oninput="document.getElementById('pProgLabel').textContent=this.value" id="pProg"/>
       <div class="form-row">
-        <button class="btn btn-sm" onclick="toggleForm()">취소</button>
-        <button class="btn btn-dark btn-sm" onclick="addProject()">추가</button>
+        <button class="btn btn-sm" onclick="toggleForm()">ì·¨ì</button>
+        <button class="btn btn-dark btn-sm" onclick="addProject()">ì¶ê°</button>
       </div>
     </div>
-
     <div id="projectList"></div>
+  </div>
+
+  <!-- ===== ARCHIVE TAB ===== -->
+  <div id="tab-archive" class="section">
+    <div id="archiveList"></div>
   </div>
 </main>
 
 <script>
-const CLAUDE_API = 'https://api.anthropic.com/v1/messages';
+// ============================================================
+// âï¸  SUPABASE ì¤ì 
+//
+// 1. https://supabase.com ìì ë¬´ë£ íë¡ì í¸ ë§ë¤ê¸°
+// 2. Project Settings â API ìì URL ê³¼ anon/public í¤ ë³µì¬
+// 3. ìë ë ì¤ êµì²´ í ì»¤ë°
+// 4. Supabase SQL Editor ìì ìë SQL ì¤í (ë± í ë²ë§):
+//
+// create table dumps (
+//   id bigserial primary key,
+//   text text not null,
+//   tag text default 'gray',
+//   confirmed boolean default false,
+//   archived boolean default false,
+//   date text,
+//   created_at timestamptz default now()
+// );
+// create table projects (
+//   id bigserial primary key,
+//   name text not null,
+//   note text default '',
+//   progress int default 30,
+//   status text default 'active',
+//   log jsonb default '[]',
+//   portfolio boolean default false,
+//   created_at timestamptz default now()
+// );
+// alter table dumps enable row level security;
+// alter table projects enable row level security;
+// create policy "Public" on dumps for all using (true);
+// create policy "Public" on projects for all using (true);
+// ============================================================
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
+const USE_SUPABASE = SUPABASE_URL.startsWith('https://');
+const sb = USE_SUPABASE ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+
+// ============================================================
+// STATE
+// ============================================================
 const COLOR_MAP = {
-  purple:'아이디어',teal:'배움',coral:'만들기',amber:'일상',blue:'앱·기술',gray:'기타'
+  purple:'ìì´ëì´', teal:'ë°°ì', coral:'ë§ë¤ê¸°',
+  amber:'ì¼ì', blue:'ì±Â·ê¸°ì ', gray:'ê¸°í'
 };
+const STATUS_LABELS = { active:'ì§í ì¤', paused:'ì ì ë©ì¶¤', done:'ìë£' };
+const STATUS_CLASSES = { active:'status-active', paused:'status-paused', done:'status-done' };
 
-// --- STORAGE ---
-function save(key, val){ try{localStorage.setItem(key, JSON.stringify(val))}catch(e){} }
-function load(key, def){ try{const v=localStorage.getItem(key);return v?JSON.parse(v):def}catch(e){return def} }
+let dumps = [];
+let projects = [];
 
-let dumps = load('dumps', [
-  {id:1,text:'니팅으로 만든 스웨터 패턴 정리하기',tag:'teal',confirmed:true,date:'예시'},
-  {id:2,text:'옷 만들기 과정을 영상으로 기록해볼까?',tag:'coral',confirmed:true,date:'예시'},
-]);
-let projects = load('projects', [
-  {id:1,name:'니팅 (수편기)',note:'클래스 수료. 다음 단계: 직접 패턴 짜보기',progress:60,status:'active',log:['클래스 완료']},
-  {id:2,name:'옷 만들기',note:'패턴, 리서치, 메이킹 공부 중. 원단 선정 고민 중.',progress:30,status:'active',log:['패턴 공부 시작']},
-]);
-let nextDId = load('nextDId', 3);
-let nextPId = load('nextPId', 3);
-
-function saveAll(){
-  save('dumps',dumps);save('projects',projects);
-  save('nextDId',nextDId);save('nextPId',nextPId);
+// ============================================================
+// SYNC BADGE
+// ============================================================
+function badge(state) {
+  const el = document.getElementById('syncBadge');
+  if (!el) return;
+  const map = {
+    ok:     { text: USE_SUPABASE ? 'âï¸ ëê¸°íë¨' : 'ð¾ ë¡ì»¬ ì ì¥', cls: USE_SUPABASE ? 'sync-ok' : 'sync-local' },
+    saving: { text: 'ì ì¥ ì¤â¦',    cls: 'sync-saving' },
+    error:  { text: 'â ï¸ ì ì¥ ì¤í¨', cls: 'sync-error'  },
+  };
+  const s = map[state] || map.ok;
+  el.textContent = s.text;
+  el.className = 'sync-badge ' + s.cls;
 }
 
-// --- TABS ---
-function switchTab(t){
-  document.querySelectorAll('.tab').forEach((el,i)=>{
-    el.classList.toggle('active',['dump','projects'][i]===t);
-  });
-  document.querySelectorAll('.section').forEach(el=>el.classList.remove('active'));
-  document.getElementById('tab-'+t).classList.add('active');
+// ============================================================
+// LOCAL STORAGE (fallback)
+// ============================================================
+function lsSave(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {} }
+function lsLoad(key, def) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch(e) { return def; } }
+function saveLocal() { if (!sb) { lsSave('dumps', dumps); lsSave('projects', projects); } }
+
+// ============================================================
+// DB HELPERS
+// ============================================================
+async function dbInsertDump(d) {
+  if (!sb) return { ...d, id: Date.now() };
+  const { data, error } = await sb.from('dumps').insert({
+    text: d.text, tag: d.tag, confirmed: d.confirmed,
+    archived: false, date: d.date
+  }).select().single();
+  if (error) throw error;
+  return data;
+}
+async function dbUpdateDump(id, updates) {
+  if (!sb) { saveLocal(); return; }
+  const { error } = await sb.from('dumps').update(updates).eq('id', id);
+  if (error) throw error;
+}
+async function dbDeleteDump(id) {
+  if (!sb) { saveLocal(); return; }
+  const { error } = await sb.from('dumps').delete().eq('id', id);
+  if (error) throw error;
+}
+async function dbInsertProject(p) {
+  if (!sb) return { ...p, id: Date.now() };
+  const { data, error } = await sb.from('projects').insert({
+    name: p.name, note: p.note, progress: p.progress,
+    status: p.status, log: p.log, portfolio: false
+  }).select().single();
+  if (error) throw error;
+  return data;
+}
+async function dbUpdateProject(id, updates) {
+  if (!sb) { saveLocal(); return; }
+  const { error } = await sb.from('projects').update(updates).eq('id', id);
+  if (error) throw error;
+}
+async function dbDeleteProject(id) {
+  if (!sb) { saveLocal(); return; }
+  const { error } = await sb.from('projects').delete().eq('id', id);
+  if (error) throw error;
 }
 
-// --- DUMP ---
-function handleKey(e){if((e.metaKey||e.ctrlKey)&&e.key==='Enter')addDump();}
+// ============================================================
+// INIT
+// ============================================================
+async function init() {
+  badge('saving');
 
-function formatDate(){
-  const d=new Date();
-  return `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
-}
-
-async function addDump(){
-  const el=document.getElementById('dumpInput');
-  const text=el.value.trim();
-  if(!text)return;
-  const id=nextDId++;
-  dumps.unshift({id,text,tag:null,confirmed:false,thinking:true,date:formatDate()});
-  el.value='';
-  saveAll();renderDumps();
-
-  try{
-    const res=await fetch(CLAUDE_API,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-6',max_tokens:1000,
-        messages:[{role:'user',content:`다음 메모를 읽고 카테고리를 JSON으로만 답해줘. 다른 말 없이 JSON만.
-카테고리: purple(아이디어/호기심), teal(배움/공부), coral(만들기/제작), amber(일상/루틴), blue(앱/기술), gray(기타)
-메모: "${text}"
-형식: {"tag":"coral"}`}]
-      })
-    });
-    const data=await res.json();
-    const raw=data.content.filter(c=>c.type==='text').map(c=>c.text).join('');
-    const parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
-    const item=dumps.find(d=>d.id===id);
-    if(item){item.tag=parsed.tag;item.thinking=false;}
-  }catch(e){
-    const item=dumps.find(d=>d.id===id);
-    if(item){item.tag='gray';item.thinking=false;}
+  // Show setup notice when not using Supabase
+  if (!USE_SUPABASE) {
+    const n = document.getElementById('setupNotice');
+    if (n) n.style.display = 'block';
   }
-  saveAll();renderDumps();
+
+  try {
+    if (sb) {
+      const [{ data: d, error: e1 }, { data: p, error: e2 }] = await Promise.all([
+        sb.from('dumps').select('*').order('created_at', { ascending: false }),
+        sb.from('projects').select('*').order('created_at', { ascending: false })
+      ]);
+      if (e1 || e2) throw e1 || e2;
+
+      dumps    = (d || []);
+      projects = (p || []);
+
+      // One-time migration from localStorage â Supabase
+      const lsDumps    = lsLoad('dumps', []);
+      const lsProjects = lsLoad('projects', []);
+      if (dumps.length === 0 && lsDumps.some(d => d.date !== 'ìì')) {
+        for (const item of lsDumps) {
+          if (item.date === 'ìì') continue;
+          const { data } = await sb.from('dumps').insert({
+            text: item.text, tag: item.tag || 'gray',
+            confirmed: item.confirmed || false,
+            archived: item.archived || false, date: item.date
+    ô¤¹Í±Ð ¤¹Í¥¹± ¤ì(¥¡Ñ¤ÕµÁÌ¹Õ¹Í¡¥Ð¡Ñ¤ì(ô(½È¡½¹ÍÐ¥Ñ´½±ÍAÉ½©ÑÌ¤ì(¥¡¥Ñ´¹¥ðôÈ±Í1½ }µ¥ÉÑ°±Í¤¤½¹Ñ¥¹Õì¼¼Í­¥ÀáµÁ±Ì(½¹ÍÐìÑôôÝ¥ÐÍ¹É½´ ÁÉ½©ÑÌ¤¹¥¹ÍÉÐ¡ì(¹µè¥Ñ´¹¹µ°¹½Ñè¥Ñ´¹¹½Ññð°ÁÉ½ÉÍÌè¥Ñ´¹ÁÉ½ÉÍÌñðÀ°(ÍÑÑÕÌè¥Ñ´¹ÍÑÑÕÌñðÑ¥Ù°±½è¥Ñ´¹±½ñðmt°Á½ÉÑ½±¥¼è±Í(ô¤¹Í±Ð ¤¹Í¥¹± ¤ì(¥¡Ñ¤ÁÉ½©ÑÌ¹ÁÕÍ ¡Ñ¤ì(ô(±½±MÑ½É¹Éµ½Ù%Ñ´ ÕµÁÌ¤ì(±½±MÑ½É¹Éµ½Ù%Ñ´ ÁÉ½©ÑÌ¤ì(±ÍMÙ }µ¥ÉÑ°ÑÉÕ¤ì(ô(ô±Íì(ÕµÁÌô±Í1½ ÕµÁÌ°áµÁ±ÕµÁÌ ¤¤ì(ÁÉ½©ÑÌô±Í1½ ÁÉ½©ÑÌ°áµÁ±AÉ½©ÑÌ ¤¤ì(ô( ½¬¤ì(ôÑ ¡ÉÈ¤ì(½¹Í½±¹ÉÉ½È ¥¹¥ÐÉÉ½Èè°ÉÈ¤ì(ÕµÁÌô±Í1½ ÕµÁÌ°áµÁ±ÕµÁÌ ¤¤ì(ÁÉ½©ÑÌô±Í1½ ÁÉ½©ÑÌ°áµÁ±AÉ½©ÑÌ ¤¤ì( ÉÉ½È¤ì(ô((É¹ÉÕµÁÌ ¤ì(É¹ÉAÉ½©ÑÌ ¤ì(É¹ÉÉ¡¥Ù ¤ì)ô()Õ¹Ñ¥½¸áµÁ±ÕµÁÌ ¤ì(ÉÑÕÉ¸l(ì¥èÄ°ÑáÐè®.#¶2²ró®p®3®N²*²n£¶À¶2£¶Ð²W®³¶VcªâÀ°ÑèÑ°°½¹¥ÉµéÑÉÕ°É¡¥Ùé±Í°Ñè²b#².pô°(ì¥èÈ°ÑáÐè²bÜ®3®NªâÀªÎó²W²v²b²²ró®pªâÃ®w¶VÓ®Îóªæ0ü°Ñè½É°°½¹¥ÉµéÑÉÕ°É¡¥Ùé±Í°Ñè²b#².pô°(tì)ô)Õ¹Ñ¥½¸áµÁ±AÉ½©ÑÌ ¤ì(ÉÑÕÉ¸l(ì¥èÄ°¹µè®.#¶2£²"c¶:ãªâÀ¤°¹½Ñè¶Ó®zc²*²"c®0¸®.²v0®.£ªÎè²²D¶2£¶Ð²s®ÎÓªâÀ°ÁÉ½ÉÍÌØØÀ°ÍÑÑÕÌèÑ¥Ù°±½él¶Ó®zc²*²f®0t°Á½ÉÑ½±¥¼é±Íô°(ì¥èÈ°¹µè²bÜ®3®NªâÀ°¹½Ñè¶2£¶Ð°®³²s²æ`°®¦S²vÓ¶
+äªÎ×®Ú ²D¸²nC®. ²²TªÎ®¾ð²D¸°ÁÉ½ÉÍÌèÌÀ°ÍÑÑÕÌèÑ¥Ù°±½él¶2£¶ÐªÎ×®Ú ².s²zDt°Á½ÉÑ½±¥¼é±Íô°(tì)ô((¼¼ôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôô(¼¼Q	L(¼¼ôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôô)Õ¹Ñ¥½¸ÍÝ¥Ñ¡Q¡Ð¤ì(½Õµ¹Ð¹ÅÕÉåM±Ñ½É±° ¹Ñ¤¹½É  ¡°°¤¤ôø(°¹±ÍÍ1¥ÍÐ¹Ñ½± Ñ¥Ù°lÕµÀ°ÁÉ½©ÑÌ°É¡¥Ùum¥tôôôÐ¤(¤ì(½Õµ¹Ð¹ÅÕÉåM±Ñ½É±° ¹ÍÑ¥½¸¤¹½É ¡°ôø°¹±ÍÍ1¥ÍÐ¹Éµ½Ù Ñ¥Ù¤¤ì(½Õµ¹Ð¹Ñ±µ¹Ñ	å% Ñ´¬Ð¤¹±ÍÍ1¥ÍÐ¹ Ñ¥Ù¤ì)ô((¼¼ôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôô(¼¼UQ<µQ¡­åÝ½ÉµÑ¡¥¹PÝ½É­Ì½±¥¹°¹¼A$¹¤(¼¼ôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôô)Õ¹Ñ¥½¸ÕÑ½Q¡ÑáÐ¤ì(½¹ÍÐÐôÑáÐ¹Ñ½1½ÝÉ
+Í ¤ì(½¹ÍÐ­Üôì(½É°èl®3®N°²s²zD°¥ä°®.#¶2°®r£ªÂp°²bÜ°¶2£¶Ð°®Ò'²p°²z³®Ò$°ªÎ×²b °¶³®zc¶R¶*à°ªÞã®³ªâÀ°ªÞã®ð°²Ò³²b°²b²t°(Ñ°èl®ÂÃ²jÀ°ªÎ×®Ú °²Æ°ªÂW²v`°¶Ó®zc²*°²"c²^°¶Vg²*Ô°²vÓ¶VÐ°²V3ªÎ².Ø°²vô°²*×®Ntt°(±Õèl²VÄ°²öS®R¤°ªÂs®Âp°ªâÃ²"°¶R®sªÞã®z °²nä°¤°²zC®>g¶fP°²öS®Np°²
+³²vÓ¶*à°²s®æ²*°¶"Ðt°(µÈèl²b®*`°®
+Ó²vð°®£¶.Ð°®²vð°².w®. °²jÓ®>d°²Ê·²0°²W®°°²*×ªÒ °²vó²°¶VÓ²Vðt°(ÁÕÉÁ±él²V²vÓ®RS²ZÐ°²wªÂ°²ZÓ®Z£ªæ0°®3²Vô°ªÂ®*°¶VÓ®ÎÓªÎ².Ø°¶VÓ®Îóªæ0°ªÚªâ °¶v®¾à°²#®s²jÐt°(ôì(½È¡½¹ÍÐmÑ°Ý½ÉÍt½=©Ð¹¹ÑÉ¥Ì¡­Ü¤¤ì(¥¡Ý½ÉÌ¹Í½µ¡ÜôøÐ¹¥¹±ÕÌ¡Ü¤¤¤ÉÑÕÉ¸Ñì(ô(ÉÑÕÉ¸Éäì)ô((¼¼ôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôô(¼¼U5@U9
+Q%=9L(¼¼ôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôô)Õ¹Ñ¥½¸¡¹±-ä¡¤ì¥ ¡¹µÑ-äñð¹ÑÉ±-ä¤¹­äôôô¹ÑÈ¤ÕµÀ ¤ìô()Õ¹Ñ¥½¸½ÉµÑÑ ¤ì(½¹ÍÐô¹ÜÑ ¤ì(ÉÑÕÉ¸í¹Ñ5½¹Ñ  ¤¬Åô¼í¹ÑÑ ¥ôí¹Ñ!½ÕÉÌ ¥ôèíMÑÉ¥¹¡¹Ñ5¥¹ÕÑÌ ¤¤¹ÁMÑÉÐ È°À¥õì)ô()Íå¹Õ¹Ñ¥½¸ÕµÀ ¤ì(½¹ÍÐ°ô½Õµ¹Ð¹Ñ±µ¹Ñ	å% ÕµÁ%¹ÁÕÐ¤ì(½¹ÍÐÑáÐô°¹Ù±Õ¹ÑÉ¥´ ¤ì(¥ ÑáÐ¤ÉÑÕÉ¸ì(°¹Ù±Õôì((½¹ÍÐÑôÕÑ½Q¡ÑáÐ¤ì(½¹ÍÐÑµÁ%ôÑµÁ|¬Ñ¹¹½Ü ¤ì(½¹ÍÐ¹Ýôì¥èÑµÁ%°ÑáÐ°Ñ°½¹¥Éµè±Í°É¡¥Ùè±Í°Ñè½ÉµÑÑ ¤ôì(ÕµÁÌ¹Õ¹Í¡¥Ð¡¹Ý¤ì(É¹ÉÕµÁÌ ¤ì( ÍÙ¥¹¤ì((ÑÉäì(½¹ÍÐÍÙôÝ¥Ð%¹ÍÉÑÕµÀ¡¹Ý¤ì(½¹ÍÐ¥àôÕµÁÌ¹¥¹%¹à¡ôø¹¥ôôôÑµÁ%¤ì(¥¡¥àôô´Ä¤ÕµÁÍm¥átôÍÙì(ÍÙ1½° ¤ì( ½¬¤ì(É¹ÉÕµÁÌ ¤ì(ôÑ ¡ÉÈ¤ì(½¹Í½±¹ÉÉ½È¡ÉÈ¤ì ÉÉ½È¤ì(ô)ô()Íå¹Õ¹Ñ¥½¸½¹¥ÉµQ¡¥¤ì(½¹ÍÐôÕµÁÌ¹¥¹¡ôø¹¥ôô¥¤ì(¥ ¤ÉÑÕÉ¸ì(¹½¹¥ÉµôÑÉÕì( ÍÙ¥¹¤ìÉ¹ÉÕµÁÌ ¤ì(ÑÉäìÝ¥ÐUÁÑÕµÀ¡¥°ì½¹¥ÉµèÑÉÕô¤ìÍÙ1½° ¤ì ½¬¤ìô(Ñ ¡ÉÈ¤ì ÉÉ½È¤ìô)ô()Íå¹Õ¹Ñ¥½¸¡¹Q¡¥°Ù°¤ì(½¹ÍÐôÕµÁÌ¹¥¹¡ôø¹¥ôô¥¤ì(¥ ñðÙ°¤ÉÑÕÉ¸ì(¹ÑôÙ°ì¹½¹¥Éµô±Íì( ÍÙ¥¹¤ìÉ¹ÉÕµÁÌ ¤ì(ÑÉäìÝ¥ÐUÁÑÕµÀ¡¥°ìÑèÙ°°½¹¥Éµè±Íô¤ìÍÙ1½° ¤ì ½¬¤ìô(Ñ ¡ÉÈ¤ì ÉÉ½È¤ìô)ô()Íå¹Õ¹Ñ¥½¸É¡¥ÙÕµÀ¡¥¤ì(½¹ÍÐôÕµÁÌ¹¥¹¡ôø¹¥ôô¥¤ì(¥ ¤ÉÑÕÉ¸ì(¹É¡¥ÙôÑÉÕì( ÍÙ¥¹¤ìÉ¹ÉÕµÁÌ ¤ìÉ¹ÉÉ¡¥Ù ¤ì(ÑÉäìÝ¥ÐUÁÑÕµÀ¡¥°ìÉ¡¥ÙèÑÉÕô¤ìÍÙ1½° ¤ì ½¬¤ìô(Ñ ¡ÉÈ¤ì ÉÉ½È¤ìô)ô()Íå¹Õ¹Ñ¥½¸Õ¹É¡¥ÙÕµÀ¡¥¤ì(½¹ÍÐôÕµÁÌ¹¥¹¡ôø¹¥ôô¥¤ì(¥ ¤ÉÑÕÉ¸ì(¹É¡¥Ùô±Íì( ÍÙ¥¹¤ìÉ¹ÉÕµÁÌ ¤ìÉ¹ÉÉ¡¥Ù ¤ì(ÑÉäìÝ¥ÐUÁÑÕµÀ¡¥°ìÉ¡¥Ùè±Íô¤ìÍÙ1½° ¤ì ½¬¤ìô(Ñ ¡ÉÈ¤ì ÉÉ½È¤ìô)ô()Íå¹Õ¹Ñ¥½¸±ÑÕµÀ¡¥¤ì(ÕµÁÌôÕµÁÌ¹¥±ÑÈ¡ôø¹¥ô¥¤ì( ÍÙ¥¹¤ìÉ¹ÉÕµÁÌ ¤ìÉ¹ÉÉ¡¥Ù ¤ì(ÑÉäìÝ¥Ð±ÑÕµÀ¡¥¤ìÍÙ1½° ¤ì ½¬¤ìô(Ñ ¡ÉÈ¤ì ÉÉ½È¤ìô)ô()Õ¹Ñ¥½¸É¹ÉÕµÁÌ ¤ì(½¹ÍÐ°ô½Õµ¹Ð¹Ñ±µ¹Ñ	å% ÕµÁ1¥ÍÐ¤ì(½¹ÍÐÄô¡½Õµ¹Ð¹Ñ±µ¹Ñ	å% ÍÉ¡%¹ÁÕÐ¤ü¹Ù±Õñð¤¹Ñ½1½ÝÉ
+Í ¤¹ÑÉ¥´ ¤ì(½¹ÍÐÑ¥ÙôÕµÁÌ¹¥±ÑÈ¡ôø¹É¡¥Ù Äñð¹ÑáÐ¹Ñ½1½ÝÉ
+Í ¤¹¥¹±ÕÌ¡Ä¤¤¤ì((¥ Ñ¥Ù¹±¹Ñ ¤ì(°¹¥¹¹É!Q50ôÄ(üñ¥Ø±ÍÌôµÁÑäµÍÑÑøíÍ¡Ä¥ôªÊ²$ªÊÃªÎð²^²v0ð½¥Øù(èñ¥Ø±ÍÌôµÁÑäµÍÑÑû®6c²ªÊ®N²vÐ²^³ªâÀ²2O²^°ð½¥Øøì(ÉÑÕÉ¸ì(ô(°¹¥¹¹É!Q50ôÑ¥Ù¹µÀ¡ôø(ñ¥Ø±ÍÌôÕµÀµ¥Ñ´ø(ñ¥Ø±ÍÌôÕµÀµÑáÐøíÍ¡¹ÑáÐ¥ôð½¥Øø(ñ¥Ø±ÍÌôÕµÀµµÑø(í¹ÑüñÍÁ¸±ÍÌôÑÑ´í¹Ñôøí
+=1=I}5Am¹Ñtñð¹Ñôð½ÍÁ¸ùèô(ì¹½¹¥Éµ¹ÑüñÕÑÑ½¸±ÍÌôÑµÍÕÍÐ½¹±¥¬ô½¹¥ÉµQ íÅ|¡¹¥¥ô¤ûrL¶fW²Tð½ÕÑÑ½¸ùèô(ì¹½¹¥ÉµüñÍ±Ð±ÍÌôÑµÍ±Ð½¹¡¹ô¡¹Q íÅ|¡¹¥¥ô±Ñ¡¥Ì¹Ù±Õ¤ø(ñ½ÁÑ¥½¸Ù±Õôû¶sªÞà®ÂSªúãªâÀð½½ÁÑ¥½¸ø(í=©Ð¹¹ÑÉ¥Ì¡
+=1=I}5@¤¹µÀ ¡m¬±Ùt¤ôø(ñ½ÁÑ¥½¸Ù±Õôí­ôí¹Ñôôõ¬üÍ±ÑèôøíÙôð½½ÁÑ¥½¸ù¤¹©½¥¸ ¥ô(ð½Í±Ðùèô(í¹½¹¥ÉµüñÍÁ¸ÍÑå±ô½¹ÐµÍ¥éèÄÅÁàí½±½ÈéÙÈ ´µÑáÐÌ¤ûrLð½ÍÁ¸ùèô(ñÍÁ¸±ÍÌôÕµÀµÑøí¹Ññðôð½ÍÁ¸ø(ñÕÑÑ½¸±ÍÌôÑ¸µ¡½ÍÐ½¹±¥¬ôÉ¡¥ÙÕµÀ íÅ|¡¹¥¥ô¤Ñ¥Ñ±ô®ÎÓªÒ¶VcªâÀûÂ~Nð½ÕÑÑ½¸ø(ñÕÑÑ½¸±ÍÌôÑ¸µ¡½ÍÐ½¹±¥¬ô±ÑÕµÀ íÅ|¡¹¥¥ô¤Ñ¥Ñ±ô²
+·²pû\ð½ÕÑÑ½¸ø(ð½¥Øø(ð½¥Øø(¤¹©½¥¸ ¤ì)ô((¼¼ôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôô(¼¼AI=)
+PU9
+Q%=9L(¼¼ôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôô)Õ¹Ñ¥½¸Ñ½±½É´ ¤ì(½¹ÍÐô½Õµ¹Ð¹Ñ±µ¹Ñ	å% ½É´¤ì(¹ÍÑå±¹¥ÍÁ±äô¹ÍÑå±¹¥ÍÁ±äôôô¹½¹ü±½¬è¹½¹ì(¥¡¹ÍÑå±¹¥ÍÁ±äôôô±½¬¤½Õµ¹Ð¹Ñ±µ¹Ñ	å% Á9µ¤¹½ÕÌ ¤ì)ô()Íå¹Õ¹Ñ¥½¸AÉ½©Ð ¤ì(½¹ÍÐ¹µô½Õµ¹Ð¹Ñ±µ¹Ñ	å% Á9µ¤¹Ù±Õ¹ÑÉ¥´ ¤ì(½¹ÍÐ¹½Ñô½Õµ¹Ð¹Ñ±µ¹Ñ	å% Á9½Ñ¤¹Ù±Õ¹ÑÉ¥´ ¤ì(½¹ÍÐÁÉ½ÉÍÌôÁÉÍ%¹Ð¡½Õµ¹Ð¹Ñ±µ¹Ñ	å% ÁAÉ½¤¹Ù±Õ¤ì(¥ ¹µ¤ÉÑÕÉ¸ì((½¹ÍÐÑµÁ%ôÑµÁ|¬Ñ¹¹½Ü ¤ì(½¹ÍÐ¹Ý@ôì¥èÑµÁ%°¹µ°¹½Ñ°ÁÉ½ÉÍÌ°ÍÑÑÕÌèÑ¥Ù°±½èmt°Á½ÉÑ½±¥¼è±Íôì(ÁÉ½©ÑÌ¹ÁÕÍ ¡¹Ý@¤ì((½Õµ¹Ð¹Ñ±µ¹Ñ	å% Á9µ¤¹Ù±Õôì(½Õµ¹Ð¹Ñ±µ¹Ñ	å% Á9½Ñ¤¹Ù±Õôì(½Õµ¹Ð¹Ñ±µ¹Ñ	å% ÁAÉ½¤¹Ù±ÕôÌÀì(½Õµ¹Ð¹Ñ±µ¹Ñ	å% ÁAÉ½1°¤¹ÑáÑ
+½¹Ñ¹ÐôÌÀì(Ñ½±½É´ ¤ìÉ¹ÉAÉ½©ÑÌ ¤ì( ÍÙ¥¹¤ì((ÑÉäì(½¹ÍÐÍÙôÝ¥Ð%¹ÍÉÑAÉ½©Ð¡¹Ý@¤ì(½¹ÍÐ¥àôÁÉ½©ÑÌ¹¥¹%¹à¡ÀôøÀ¹¥ôôôÑµÁ%¤ì(¥¡¥àôô´Ä¤ÁÉ½©ÑÍm¥átôÍÙì(ÍÙ1½° ¤ì ½¬¤ìÉ¹ÉAÉ½©ÑÌ ¤ì(ôÑ ¡ÉÈ¤ì(½¹Í½±¹ÉÉ½È¡ÉÈ¤ì ÉÉ½È¤ì(ô)ô()Íå¹Õ¹Ñ¥½¸ÕÁÑAÉ½¡¥°Ù°¤ì( const p = projects.find(p => p.id == id);
+  if (!p) return;
+  p.progress = parseInt(val);
+  const numEl  = document.getElementById('pn-' + id);
+  const fillEl = document.getElementById('pf-' + id);
+  if (numEl)  numEl.textContent  = val + '%';
+  if (fillEl) fillEl.style.width = val + '%';
+  try { await dbUpdateProject(id, { progress: p.progress }); saveLocal(); }
+  catch(err) { console.error(err); }
 }
 
-function confirmTag(id){
-  const d=dumps.find(d=>d.id===id);
-  if(d){d.confirmed=true;saveAll();renderDumps();}
-}
-function changeTag(id,val){
-  const d=dumps.find(d=>d.id===id);
-  if(d){d.tag=val;d.confirmed=false;saveAll();renderDumps();}
-}
-function deleteDump(id){
-  dumps=dumps.filter(d=>d.id!==id);saveAll();renderDumps();
+async function toggleStatus(id) {
+  const p = projects.find(p => p.id == id);
+  if (!p) return;
+  const cycle = { active:'paused', paused:'done', done:'active' };
+  p.status = cycle[p.status] || 'active';
+  badge('saving'); renderProjects(); renderArchive();
+  try { await dbUpdateProject(id, { status: p.status }); saveLocal(); badge('ok'); }
+  catch(err) { badge('error'); }
 }
 
-function renderDumps(){
-  const el=document.getElementById('dumpList');
-  if(!dumps.length){el.innerHTML='<div class="empty-state">던진 것들이 여기 쌓여</div>';return;}
-  el.innerHTML=dumps.map(d=>`
-    <div class="dump-item">
-      <div class="dump-text">${d.text}</div>
-      <div class="dump-meta">
-        ${d.thinking
-          ?`<span class="thinking">AI 분류 중...</span>`
-          :`${d.tag?`<span class="tag tag-${d.tag}">${COLOR_MAP[d.tag]||d.tag}</span>`:''}`
-        }
-        ${!d.thinking&&!d.confirmed&&d.tag?`<span class="tag-suggest" onclick="confirmTag(${d.id})">✓ 확정</span>`:''}
-        ${!d.thinking&&!d.confirmed?`<select class="tag-select" onchange="changeTag(${d.id},this.value)">
-          <option value="">바꾸기</option>
-          ${Object.entries(COLOR_MAP).map(([k,v])=>`<option value="${k}"${d.tag===k?' selected':''}>${v}</option>`).join('')}
-        </select>`:''}
-        ${d.confirmed?`<span style="font-size:11px;color:var(--text3)">✓</span>`:''}
-        <span class="dump-date">${d.date}</span>
-        <button class="del-btn" onclick="deleteDump(${d.id})" title="삭제">×</button>
-      </div>
-    </div>
-  `).join('');
+async function addLog(id) {
+  const inp  = document.getElementById('log-' + id);
+  const text = inp.value.trim();
+  if (!text) return;
+  const p = projects.find(p => p.id == id);
+  if (!p) return;
+  if (!p.log) p.log = [];
+  const d = new Date();
+  p.log.push(`${d.getMonth()+1}/${d.getDate()} â ${text}`);
+  inp.value = '';
+  badge('saving'); renderProjects();
+  try { await dbUpdateProject(id, { log: p.log }); saveLocal(); badge('ok'); }
+  catch(err) { badge('error'); }
 }
 
-// --- PROJECTS ---
-function toggleForm(){
-  const f=document.getElementById('addForm');
-  f.style.display=f.style.display==='none'?'block':'none';
-  if(f.style.display==='block')document.getElementById('pName').focus();
+async function deleteProject(id) {
+  projects = projects.filter(p => p.id != id);
+  badge('saving'); renderProjects(); renderArchive();
+  try { await dbDeleteProject(id); saveLocal(); badge('ok'); }
+  catch(err) { badge('error'); }
 }
 
-function addProject(){
-  const name=document.getElementById('pName').value.trim();
-  const note=document.getElementById('pNote').value.trim();
-  const progress=parseInt(document.getElementById('pProg').value);
-  if(!name)return;
-  projects.push({id:nextPId++,name,note,progress,status:'active',log:[]});
-  document.getElementById('pName').value='';
-  document.getElementById('pNote').value='';
-  document.getElementById('pProg').value=30;
-  document.getElementById('pProgLabel').textContent=30;
-  toggleForm();saveAll();renderProjects();
+async function togglePortfolio(id) {
+  const p = projects.find(p => p.id == id);
+  if (!p) return;
+  p.portfolio = !p.portfolio;
+  badge('saving'); renderProjects(); renderArchive();
+  try { await dbUpdateProject(id, { portfolio: p.portfolio }); saveLocal(); badge('ok'); }
+  catch(err) { badge('error'); }
 }
 
-function toggleStatus(id){
-  const p=projects.find(p=>p.id===id);
-  if(p){p.status=p.status==='active'?'paused':'active';saveAll();renderProjects();}
-}
-function updateProg(id,val){
-  const p=projects.find(p=>p.id===id);
-  if(p){p.progress=parseInt(val);saveAll();}
-  document.getElementById('pn-'+id).textContent=val;
-  document.getElementById('pf-'+id).style.width=val+'%';
-}
-function addLog(id){
-  const inp=document.getElementById('log-'+id);
-  const text=inp.value.trim();
-  if(!text)return;
-  const p=projects.find(p=>p.id===id);
-  if(p){
-    if(!p.log)p.log=[];
-    const d=new Date();
-    p.log.push(`${d.getMonth()+1}/${d.getDate()} — ${text}`);
-    inp.value='';saveAll();renderProjects();
-  }
-}
-function deleteProject(id){
-  projects=projects.filter(p=>p.id!==id);saveAll();renderProjects();
-}
-
-function renderProjects(){
-  document.getElementById('projCount').textContent=`${projects.length}개`;
-  const el=document.getElementById('projectList');
-  if(!projects.length){el.innerHTML='<div class="empty-state">프로젝트를 추가해봐</div>';return;}
-  el.innerHTML=projects.map(p=>`
+function renderProjects() {
+  const active = projects.filter(p => p.status !== 'done');
+  document.getElementById('projCount').textContent = `${active.length}ê° ì§í ì¤`;
+  const el = document.getElementById('projectList');
+  if (!active.length) { el.innerHTML = '<div class="empty-state">íë¡ì í¸ë¥¼ ì¶ê°í´ë´</div>'; return; }
+  el.innerHTML = active.map(p => `
     <div class="proj-card">
       <div class="proj-card-header">
-        <span class="proj-name">${p.name}</span>
+        <span class="proj-name">${esc(p.name)}</span>
         <div style="display:flex;gap:6px;align-items:center">
-          <span class="status-pill ${p.status==='active'?'status-active':'status-paused'}" onclick="toggleStatus(${p.id})">
-            ${p.status==='active'?'진행 중':'잠시 멈춤'}
+          ${p.portfolio ? '<span title="í¬í¸í´ë¦¬ì¤ì íìë¨">â­</span>' : ''}
+          <span class="status-pill ${STATUS_CLASSES[p.status] || 'status-active'}" onclick="toggleStatus(${q_(p.id)})">
+            ${STATUS_LABELS[p.status] || p.status}
           </span>
-          <button class="del-btn" onclick="deleteProject(${p.id})" title="삭제">×</button>
+          <button class="btn-ghost" onclick="deleteProject(${q_(p.id)})" title="ì­ì ">Ã</button>
         </div>
       </div>
-      ${p.note?`<div class="proj-note">${p.note}</div>`:''}
+      ${p.note ? `<div class="proj-note">${esc(p.note)}</div>` : ''}
       <div class="progress-row">
         <input type="range" min="0" max="100" value="${p.progress}" step="1"
-          oninput="updateProg(${p.id},this.value)" />
+          oninput="updateProg(${q_(p.id)},this.value)" />
         <span class="prog-num" id="pn-${p.id}">${p.progress}%</span>
       </div>
-      <div class="progress-track"><div class="progress-fill" id="pf-${p.id}" style="width:${p.progress}%"></div></div>
-      ${p.log&&p.log.length?`<div class="proj-log">${p.log.join('<br>')}</div>`:''}
-      <div style="margin-top:8px;display:flex;gap:6px">
-        <input class="log-input" id="log-${p.id}" placeholder="기록 추가..." onkeydown="if(event.key==='Enter')addLog(${p.id})" style="flex:1"/>
-        <button class="btn btn-sm" onclick="addLog(${p.id})">추가</button>
+      <div class="progress-track">
+        <div class="progress-fill" id="pf-${p.id}" style="width:${p.progress}%"></div>
+      </div>
+      ${p.log && p.log.length ? `<div class="proj-log">${p.log.map(esc).join('<br>')}</div>` : ''}
+      <div style="margin-top:8px;display:flex;gap:6px;align-items:center">
+        <input class="log-input" id="log-${p.id}" placeholder="ê¸°ë¡ ì¶ê°â¦"
+          onkeydown="if(event.key==='Enter')addLog(${q_(p.id)})" style="flex:1"/>
+        <button class="btn btn-sm" onclick="addLog(${q_(p.id)})">ì¶ê°</button>
+        <button class="btn btn-sm" onclick="togglePortfolio(${q_(p.id)})" title="${p.portfolio?'í¬í¸í´ë¦¬ì¤ìì ì ê±°':'í¬í¸í´ë¦¬ì¤ì ì¶ê°'}">â­</button>
       </div>
     </div>
   `).join('');
 }
 
-renderDumps();
-renderProjects();
+// ============================================================
+// ARCHIVE
+// ============================================================
+function renderArchive() {
+  const el          = document.getElementById('archiveList');
+  const archived    = dumps.filter(d => d.archived);
+  const done        = projects.filter(p => p.status === 'done');
+  const portfolio   = projects.filter(p => p.portfolio && p.status !== 'done');
+
+  if (!archived.length && !done.length && !portfolio.length) {
+    el.innerHTML = '<div class="empty-state">ìë£íê±°ë ë³´ê´í ê²ë¤ì´ ì¬ê¸° ìì¬</div>';
+    return;
+  }
+
+  let html = '';
+
+  if (portfolio.length) {
+    html += '<div class="archive-section-label">â­ í¬í¸í´ë¦¬ì¤ íë³´</div>';
+    html += portfolio.map(p => `
+      <div class="archive-item">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong style="font-size:14px">${esc(p.name)}</strong>
+          <div style="display:flex;gap:6px">
+            <span class="status-pill ${STATUS_CLASSES[p.status]||'status-active'}">${STATUS_LABELS[p.status]||''}</span>
+            <button class="btn-ghost" onclick="togglePortfolio(${q_(p.id)})" title="í¬í¸í´ë¦¬ì¤ í´ì ">â</button>
+          </div>
+        </div>
+        ${p.note ? `<div style="font-size:13px;color:var(--text2);margin-top:4px">${esc(p.note)}</div>` : ''}
+        <div style="margin-top:6px">
+          <div class="progress-track" style="margin-bottom:0">
+            <div class="progress-fill" style="width:${p.progress}%"></div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  if (done.length) {
+    html += '<div class="archive-section-label">â ìë£ë íë¡ì í¸</div>';
+    html += done.map(p => `
+      <div class="archive-item">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <strong style="font-size:14px">${esc(p.name)}</strong>
+            ${p.portfolio ? ' <span title="í¬í¸í´ë¦¬ì¤">â­</span>' : ''}
+            ${p.note ? `<div style="font-size:13px;color:var(--text2);margin-top:4px">${esc(p.note)}</div>` : ''}
+            ${p.log && p.log.length ? `<div class="proj-log" style="margin-top:6px">${p.log.map(esc).join('<br>')}</div>` : ''}
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0;margin-left:12px">
+            <button class="btn btn-sm" onclick="toggleStatus(${q_(p.id)})" title="ë¤ì ìì">â© ë¤ì</button>
+            <button class="btn-ghost" onclick="deleteProject(${q_(p.id)})">Ã</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  if (archived.length) {
+    html += '<div class="archive-section-label">ð¦ ë³´ê´ë ìê°ë¤</div>';
+    html += archived.map(d => `
+      <div class="archive-item">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div style="font-size:14px;margin-bottom:6px">${esc(d.text)}</div>
+            ${d.tag ? `<span class="tag tag-${d.tag}">${COLOR_MAP[d.tag]||d.tag}</span>` : ''}
+          </div>
+          <div style="display:flex;gap:4px;align-items:center;flex-shrink:0;margin-left:12px">
+            <span style="font-size:11px;color:var(--text3)">${d.date||''}</span>
+            <button class="btn-ghost" onclick="unarchiveDump(${q_(d.id)})" title="ë¤ì ê°ì ¸ì¤ê¸°">â©</button>
+            <button class="btn-ghost" onclick="deleteDump(${q_(d.id)})">Ã</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  el.innerHTML = html;
+}
+
+// ============================================================
+// EXPORT
+// ============================================================
+function exportData() {
+  const payload = {
+    exported_at: new Date().toISOString(),
+    dumps, projects
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `ëìë_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function esc(s) {
+  return String(s||'')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function q_(id) { return JSON.stringify(id); }
+
+// ============================================================
+// BOOT
+// ============================================================
+init();
 </script>
 </body>
 </html>
