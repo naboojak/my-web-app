@@ -1,0 +1,11 @@
+# Supabase 키 설정 파일 — 절대 커밋하지 마세요
+config.js
+
+# 환경변수 파일
+.env
+.env.local
+.env.*.local
+
+# OS / 에디터
+.DS_Store
+Thumbs.db
