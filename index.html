@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나의 뇌 — 브레인덤프 & 프로젝트</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500&display=swap');
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#F7F6F3;
+    --surface:#FFFFFF;
+    --surface2:#F0EEE9;
+    --border:#E0DDD6;
+    --text:#1A1917;
+    --text2:#6B6860;
+    --text3:#A8A59E;
+    --accent:#1A1917;
+    --tag-purple-bg:#EEEDFE;--tag-purple-fg:#3C3489;
+    --tag-teal-bg:#E1F5EE;--tag-teal-fg:#085041;
+    --tag-coral-bg:#FAECE7;--tag-coral-fg:#712B13;
+    --tag-amber-bg:#FAEEDA;--tag-amber-fg:#633806;
+    --tag-blue-bg:#E6F1FB;--tag-blue-fg:#0C447C;
+    --tag-gray-bg:#F1EFE8;--tag-gray-fg:#444441;
+  }
+  body{
+    font-family:'IBM Plex Sans KR',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    font-size:15px;
+    line-height:1.6;
+  }
+  header{
+    padding:2rem 2rem 0;
+    max-width:720px;
+    margin:0 auto;
+  }
+  header h1{
+    font-size:22px;
+    font-weight:500;
+    letter-spacing:-0.3px;
+  }
+  header p{
+    font-size:13px;
+    color:var(--text3);
+    margin-top:4px;
+  }
+  .tabs{
+    display:flex;
+    gap:0;
+    margin-top:1.5rem;
+    border-bottom:1px solid var(--border);
+  }
+  .tab{
+    padding:10px 20px;
+    font-size:14px;
+    font-family:'IBM Plex Sans KR',sans-serif;
+    cursor:pointer;
+    border:none;
+    background:none;
+    color:var(--text2);
+    border-bottom:2px solid transparent;
+    margin-bottom:-1px;
+    transition:color 0.15s;
+  }
+  .tab.active{color:var(--text);border-bottom-color:var(--text);font-weight:500;}
+  .tab:hover{color:var(--text)}
+  main{max-width:720px;margin:0 auto;padding:1.5rem 2rem 4rem;}
+  .section{display:none}.section.active{display:block}
+
+  /* dump */
+  .dump-input-area{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:1rem 1.25rem;
+    margin-bottom:1.5rem;
+  }
+  .dump-label{font-size:12px;color:var(--text3);margin-bottom:8px;display:block}
+  textarea{
+    width:100%;
+    min-height:72px;
+    border:none;
+    outline:none;
+    font-size:15px;
+    font-family:'IBM Plex Sans KR',sans-serif;
+    color:var(--text);
+    background:transparent;
+    resize:none;
+    line-height:1.6;
+  }
+  textarea::placeholder{color:var(--text3)}
+  .input-footer{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+  .hint{font-size:12px;color:var(--text3)}
+  .btn{
+    padding:7px 16px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    background:none;
+    font-size:13px;
+    font-family:'IBM Plex Sans KR',sans-serif;
+    cursor:pointer;
+    color:var(--text);
+    transition:background 0.1s;
+  }
+  .btn:hover{background:var(--surface2)}
+  .btn-dark{background:var(--text);color:#fff;border-color:var(--text)}
+  .btn-dark:hover{background:#333}
+  .btn-sm{padding:4px 10px;font-size:12px}
+
+  .dump-item{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:12px 14px;
+    margin-bottom:8px;
+    transition:border-color 0.15s;
+  }
+  .dump-item:hover{border-color:#C8C5BE}
+  .dump-text{font-size:14px;color:var(--text);margin-bottom:8px;line-height:1.6}
+  .dump-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .tag{font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px;white-space:nowrap}
+  .tag-purple{background:var(--tag-purple-bg);color:var(--tag-purple-fg)}
+  .tag-teal{background:var(--tag-teal-bg);color:var(--tag-teal-fg)}
+  .tag-coral{background:var(--tag-coral-bg);color:var(--tag-coral-fg)}
+  .tag-amber{background:var(--tag-amber-bg);color:var(--tag-amber-fg)}
+  .tag-blue{background:var(--tag-blue-bg);color:var(--tag-blue-fg)}
+  .tag-gray{background:var(--tag-gray-bg);color:var(--tag-gray-fg)}
+  .tag-suggest{
+    font-size:11px;padding:3px 9px;border-radius:20px;
+    background:#E6F1FB;color:#0C447C;
+    cursor:pointer;border:1px solid #B5D4F4;
+    transition:opacity 0.1s;
+  }
+  .tag-suggest:hover{opacity:0.75}
+  .dump-date{font-size:11px;color:var(--text3);margin-left:auto}
+  .del-btn{
+    background:none;border:none;cursor:pointer;
+    color:var(--text3);font-size:14px;padding:0 2px;
+    transition:color 0.1s;
+  }
+  .del-btn:hover{color:var(--text)}
+  .thinking{font-size:12px;color:#185FA5;font-style:italic}
+  select.tag-select{
+    font-size:12px;padding:3px 6px;border:1px solid var(--border);
+    border-radius:20px;background:var(--surface);color:var(--text2);
+    outline:none;font-family:'IBM Plex Sans KR',sans-serif;cursor:pointer;
+  }
+  .empty-state{text-align:center;padding:3rem 0;color:var(--text3);font-size:14px}
+
+  /* projects */
+  .proj-header-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+  .proj-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:1.25rem;
+    margin-bottom:10px;
+  }
+  .proj-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+  .proj-name{font-size:15px;font-weight:500}
+  .status-pill{
+    font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;cursor:pointer;
+    white-space:nowrap;transition:opacity 0.1s;
+  }
+  .status-pill:hover{opacity:0.75}
+  .status-active{background:var(--tag-teal-bg);color:var(--tag-teal-fg)}
+  .status-paused{background:var(--tag-amber-bg);color:var(--tag-amber-fg)}
+  .proj-note{font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6}
+  .progress-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  input[type=range]{
+    flex:1;height:4px;accent-color:var(--text);cursor:pointer;
+  }
+  .prog-num{font-size:12px;color:var(--text2);min-width:32px;text-align:right}
+  .progress-track{height:3px;background:var(--surface2);border-radius:3px;margin-bottom:10px}
+  .progress-fill{height:100%;background:var(--text);border-radius:3px;transition:width 0.3s}
+  .proj-log{
+    font-size:12px;color:var(--text3);
+    border-left:2px solid var(--border);
+    padding-left:10px;line-height:1.8;
+  }
+  .proj-actions{display:flex;gap:6px;margin-top:10px}
+
+  .add-form{
+    background:var(--surface2);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:1.25rem;
+    margin-bottom:12px;
+  }
+  .form-label{font-size:12px;color:var(--text3);margin-bottom:4px;display:block}
+  .form-input{
+    width:100%;padding:8px 10px;
+    border:1px solid var(--border);border-radius:8px;
+    font-size:14px;font-family:'IBM Plex Sans KR',sans-serif;
+    background:var(--surface);color:var(--text);outline:none;
+    margin-bottom:10px;
+  }
+  .form-input:focus{border-color:#A8A59E}
+  .form-row{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+
+  /* note log textarea */
+  .log-input{
+    width:100%;padding:6px 10px;font-size:13px;
+    border:1px solid var(--border);border-radius:8px;
+    font-family:'IBM Plex Sans KR',sans-serif;
+    background:var(--surface);color:var(--text);outline:none;
+    margin-top:6px;
+  }
+  .log-input:focus{border-color:#A8A59E}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>나의 뇌</h1>
+  <p>브레인덤프 & 프로젝트 트래커</p>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('dump')">브레인덤프</button>
+    <button class="tab" onclick="switchTab('projects')">프로젝트</button>
+  </div>
+</header>
+
+<main>
+  <!-- DUMP TAB -->
+  <div id="tab-dump" class="section active">
+    <div class="dump-input-area">
+      <span class="dump-label">머릿속에 있는 거 다 던져</span>
+      <textarea id="dumpInput" placeholder="하고싶은 것, 아이디어, 배우고싶은 것 뭐든..." onkeydown="handleKey(event)"></textarea>
+      <div class="input-footer">
+        <span class="hint">⌘+Enter 또는 버튼</span>
+        <button class="btn btn-dark" onclick="addDump()">던지기</button>
+      </div>
+    </div>
+    <div id="dumpList"></div>
+  </div>
+
+  <!-- PROJECTS TAB -->
+  <div id="tab-projects" class="section">
+    <div class="proj-header-row">
+      <span style="font-size:13px;color:var(--text3)" id="projCount"></span>
+      <button class="btn btn-dark btn-sm" onclick="toggleForm()">+ 새 프로젝트</button>
+    </div>
+
+    <div id="addForm" style="display:none" class="add-form">
+      <span class="form-label">프로젝트 이름</span>
+      <input class="form-input" id="pName" placeholder="예: 옷 만들기" />
+      <span class="form-label">지금 어디쯤인지, 고민되는 것</span>
+      <textarea class="form-input" id="pNote" placeholder="현재 상황이나 막히는 부분..." style="min-height:60px;resize:none"></textarea>
+      <span class="form-label">진행도 <span id="pProgLabel">30</span>%</span>
+      <input type="range" style="width:100%;margin-bottom:12px" min="0" max="100" value="30" step="1"
+        oninput="document.getElementById('pProgLabel').textContent=this.value" id="pProg"/>
+      <div class="form-row">
+        <button class="btn btn-sm" onclick="toggleForm()">취소</button>
+        <button class="btn btn-dark btn-sm" onclick="addProject()">추가</button>
+      </div>
+    </div>
+
+    <div id="projectList"></div>
+  </div>
+</main>
+
+<script>
+const CLAUDE_API = 'https://api.anthropic.com/v1/messages';
+const COLOR_MAP = {
+  purple:'아이디어',teal:'배움',coral:'만들기',amber:'일상',blue:'앱·기술',gray:'기타'
+};
+
+// --- STORAGE ---
+function save(key, val){ try{localStorage.setItem(key, JSON.stringify(val))}catch(e){} }
+function load(key, def){ try{const v=localStorage.getItem(key);return v?JSON.parse(v):def}catch(e){return def} }
+
+let dumps = load('dumps', [
+  {id:1,text:'니팅으로 만든 스웨터 패턴 정리하기',tag:'teal',confirmed:true,date:'예시'},
+  {id:2,text:'옷 만들기 과정을 영상으로 기록해볼까?',tag:'coral',confirmed:true,date:'예시'},
+]);
+let projects = load('projects', [
+  {id:1,name:'니팅 (수편기)',note:'클래스 수료. 다음 단계: 직접 패턴 짜보기',progress:60,status:'active',log:['클래스 완료']},
+  {id:2,name:'옷 만들기',note:'패턴, 리서치, 메이킹 공부 중. 원단 선정 고민 중.',progress:30,status:'active',log:['패턴 공부 시작']},
+]);
+let nextDId = load('nextDId', 3);
+let nextPId = load('nextPId', 3);
+
+function saveAll(){
+  save('dumps',dumps);save('projects',projects);
+  save('nextDId',nextDId);save('nextPId',nextPId);
+}
+
+// --- TABS ---
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach((el,i)=>{
+    el.classList.toggle('active',['dump','projects'][i]===t);
+  });
+  document.querySelectorAll('.section').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+}
+
+// --- DUMP ---
+function handleKey(e){if((e.metaKey||e.ctrlKey)&&e.key==='Enter')addDump();}
+
+function formatDate(){
+  const d=new Date();
+  return `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+async function addDump(){
+  const el=document.getElementById('dumpInput');
+  const text=el.value.trim();
+  if(!text)return;
+  const id=nextDId++;
+  dumps.unshift({id,text,tag:null,confirmed:false,thinking:true,date:formatDate()});
+  el.value='';
+  saveAll();renderDumps();
+
+  try{
+    const res=await fetch(CLAUDE_API,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6',max_tokens:1000,
+        messages:[{role:'user',content:`다음 메모를 읽고 카테고리를 JSON으로만 답해줘. 다른 말 없이 JSON만.
+카테고리: purple(아이디어/호기심), teal(배움/공부), coral(만들기/제작), amber(일상/루틴), blue(앱/기술), gray(기타)
+메모: "${text}"
+형식: {"tag":"coral"}`}]
+      })
+    });
+    const data=await res.json();
+    const raw=data.content.filter(c=>c.type==='text').map(c=>c.text).join('');
+    const parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    const item=dumps.find(d=>d.id===id);
+    if(item){item.tag=parsed.tag;item.thinking=false;}
+  }catch(e){
+    const item=dumps.find(d=>d.id===id);
+    if(item){item.tag='gray';item.thinking=false;}
+  }
+  saveAll();renderDumps();
+}
+
+function confirmTag(id){
+  const d=dumps.find(d=>d.id===id);
+  if(d){d.confirmed=true;saveAll();renderDumps();}
+}
+function changeTag(id,val){
+  const d=dumps.find(d=>d.id===id);
+  if(d){d.tag=val;d.confirmed=false;saveAll();renderDumps();}
+}
+function deleteDump(id){
+  dumps=dumps.filter(d=>d.id!==id);saveAll();renderDumps();
+}
+
+function renderDumps(){
+  const el=document.getElementById('dumpList');
+  if(!dumps.length){el.innerHTML='<div class="empty-state">던진 것들이 여기 쌓여</div>';return;}
+  el.innerHTML=dumps.map(d=>`
+    <div class="dump-item">
+      <div class="dump-text">${d.text}</div>
+      <div class="dump-meta">
+        ${d.thinking
+          ?`<span class="thinking">AI 분류 중...</span>`
+          :`${d.tag?`<span class="tag tag-${d.tag}">${COLOR_MAP[d.tag]||d.tag}</span>`:''}`
+        }
+        ${!d.thinking&&!d.confirmed&&d.tag?`<span class="tag-suggest" onclick="confirmTag(${d.id})">✓ 확정</span>`:''}
+        ${!d.thinking&&!d.confirmed?`<select class="tag-select" onchange="changeTag(${d.id},this.value)">
+          <option value="">바꾸기</option>
+          ${Object.entries(COLOR_MAP).map(([k,v])=>`<option value="${k}"${d.tag===k?' selected':''}>${v}</option>`).join('')}
+        </select>`:''}
+        ${d.confirmed?`<span style="font-size:11px;color:var(--text3)">✓</span>`:''}
+        <span class="dump-date">${d.date}</span>
+        <button class="del-btn" onclick="deleteDump(${d.id})" title="삭제">×</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// --- PROJECTS ---
+function toggleForm(){
+  const f=document.getElementById('addForm');
+  f.style.display=f.style.display==='none'?'block':'none';
+  if(f.style.display==='block')document.getElementById('pName').focus();
+}
+
+function addProject(){
+  const name=document.getElementById('pName').value.trim();
+  const note=document.getElementById('pNote').value.trim();
+  const progress=parseInt(document.getElementById('pProg').value);
+  if(!name)return;
+  projects.push({id:nextPId++,name,note,progress,status:'active',log:[]});
+  document.getElementById('pName').value='';
+  document.getElementById('pNote').value='';
+  document.getElementById('pProg').value=30;
+  document.getElementById('pProgLabel').textContent=30;
+  toggleForm();saveAll();renderProjects();
+}
+
+function toggleStatus(id){
+  const p=projects.find(p=>p.id===id);
+  if(p){p.status=p.status==='active'?'paused':'active';saveAll();renderProjects();}
+}
+function updateProg(id,val){
+  const p=projects.find(p=>p.id===id);
+  if(p){p.progress=parseInt(val);saveAll();}
+  document.getElementById('pn-'+id).textContent=val;
+  document.getElementById('pf-'+id).style.width=val+'%';
+}
+function addLog(id){
+  const inp=document.getElementById('log-'+id);
+  const text=inp.value.trim();
+  if(!text)return;
+  const p=projects.find(p=>p.id===id);
+  if(p){
+    if(!p.log)p.log=[];
+    const d=new Date();
+    p.log.push(`${d.getMonth()+1}/${d.getDate()} — ${text}`);
+    inp.value='';saveAll();renderProjects();
+  }
+}
+function deleteProject(id){
+  projects=projects.filter(p=>p.id!==id);saveAll();renderProjects();
+}
+
+function renderProjects(){
+  document.getElementById('projCount').textContent=`${projects.length}개`;
+  const el=document.getElementById('projectList');
+  if(!projects.length){el.innerHTML='<div class="empty-state">프로젝트를 추가해봐</div>';return;}
+  el.innerHTML=projects.map(p=>`
+    <div class="proj-card">
+      <div class="proj-card-header">
+        <span class="proj-name">${p.name}</span>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span class="status-pill ${p.status==='active'?'status-active':'status-paused'}" onclick="toggleStatus(${p.id})">
+            ${p.status==='active'?'진행 중':'잠시 멈춤'}
+          </span>
+          <button class="del-btn" onclick="deleteProject(${p.id})" title="삭제">×</button>
+        </div>
+      </div>
+      ${p.note?`<div class="proj-note">${p.note}</div>`:''}
+      <div class="progress-row">
+        <input type="range" min="0" max="100" value="${p.progress}" step="1"
+          oninput="updateProg(${p.id},this.value)" />
+        <span class="prog-num" id="pn-${p.id}">${p.progress}%</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="pf-${p.id}" style="width:${p.progress}%"></div></div>
+      ${p.log&&p.log.length?`<div class="proj-log">${p.log.join('<br>')}</div>`:''}
+      <div style="margin-top:8px;display:flex;gap:6px">
+        <input class="log-input" id="log-${p.id}" placeholder="기록 추가..." onkeydown="if(event.key==='Enter')addLog(${p.id})" style="flex:1"/>
+        <button class="btn btn-sm" onclick="addLog(${p.id})">추가</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+renderDumps();
+renderProjects();
+</script>
+</body>
+</html>
