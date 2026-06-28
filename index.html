@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ëì ë</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500&display=swap');
 
@@ -311,8 +312,8 @@ input[type=range]{flex:1;height:4px;accent-color:var(--text);cursor:pointer}
 // create policy "Public" on dumps for all using (true);
 // create policy "Public" on projects for all using (true);
 // ============================================================
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const SUPABASE_URL = window.SUPABASE_URL || '';
+const SUPABASE_KEY = window.SUPABASE_KEY || '';
 
 const USE_SUPABASE = SUPABASE_URL.startsWith('https://');
 const sb = USE_SUPABASE ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
